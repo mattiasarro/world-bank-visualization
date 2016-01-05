@@ -10,12 +10,12 @@ var regions = {
   w = 925,
   h = 550,
   margin = 30,
-  startYear = 1960,
-  endYear = 2010,
-  startAge = 20,
-  endAge = 80,
-  y = d3.scale.linear().domain([endAge, startAge]).range([0 + margin, h - margin]),
-  x = d3.scale.linear().domain([1960, 2009]).range([0 + margin - 5, w]),
+  startYear = 1994,
+  endYear = 2014,
+  startPercent = 0,
+  endPercent = 100,
+  y = d3.scale.linear().domain([endPercent, startPercent]).range([0 + margin, h - margin]),
+  x = d3.scale.linear().domain([1994, 2014]).range([0 + margin - 5, w]),
   years = d3.range(startYear, endYear);
 var vis = d3.select("#vis").append("svg:svg").attr("width", w).attr("height", h).append("svg:g")
 var line = d3.svg.line().x(function(d, i) {
@@ -36,8 +36,13 @@ var startEnd = {},
   d3.text('internet-usage-countries.csv', 'text/csv', function(text) {
     var countries = d3.csv.parseRows(text);
     for (i = 1; i < countries.length; i++) {
+      countries[i] = countries[i].slice(2, countries[i.length - 1]);
+    } 
+    
+    
+    for (i = 1; i < countries.length; i++) {
       // console.log("--", values);
-      var values = countries[i].slice(4, countries[i.length - 1]);
+      var values = countries[i].slice(2, countries[i.length - 1]);
       var currData = [];
       countryCodes[countries[i][1]] = countries[i][0];
       var started = false;
@@ -59,41 +64,12 @@ var startEnd = {},
           }
         }
       }
-      // vis.append("svg:path").data([currData]).attr("country", countries[i][1]).attr("class", countries_regions[countries[i][1]]).attr("d", line).on("mouseover", onmouseover).on("mouseout", onmouseout);
+      vis.append("svg:path").data([currData]).attr("country", countries[i][1]).attr("class", countries_regions[countries[i][1]]).attr("d", line).on("mouseover", onmouseover).on("mouseout", onmouseout);
     }
   });
   
-d3.text('life-expectancy-cleaned-all.csv', 'text/csv', function(text) {
-  var countries = d3.csv.parseRows(text);
-  for (i = 1; i < countries.length; i++) {
-    var values = countries[i].slice(2, countries[i.length - 1]);
-    // console.log("--", values);
-    var currData = [];
-    countryCodes[countries[i][1]] = countries[i][0];
-    var started = false;
-    for (j = 0; j < values.length; j++) {
-      if (values[j] != '') {
-        currData.push({
-          x: years[j],
-          y: values[j]
-        });
-        if (!started) {
-          startEnd[countries[i][1]] = {
-            'startYear': years[j],
-            'startVal': values[j]
-          };
-          started = true;
-        } else if (j == values.length - 1) {
-          startEnd[countries[i][1]]['endYear'] = years[j];
-          startEnd[countries[i][1]]['endVal'] = values[j];
-        }
-      }
-    }
-    vis.append("svg:path").data([currData]).attr("country", countries[i][1]).attr("class", countries_regions[countries[i][1]]).attr("d", line).on("mouseover", onmouseover).on("mouseout", onmouseout);
-  }
-});
-vis.append("svg:line").attr("x1", x(1960)).attr("y1", y(startAge)).attr("x2", x(2009)).attr("y2", y(startAge)).attr("class", "axis")
-vis.append("svg:line").attr("x1", x(startYear)).attr("y1", y(startAge)).attr("x2", x(startYear)).attr("y2", y(endAge)).attr("class", "axis")
+vis.append("svg:line").attr("x1", x(1994)).attr("y1", y(startPercent)).attr("x2", x(2009)).attr("y2", y(startPercent)).attr("class", "axis")
+vis.append("svg:line").attr("x1", x(startYear)).attr("y1", y(startPercent)).attr("x2", x(startYear)).attr("y2", y(endPercent)).attr("class", "axis")
 vis.selectAll(".xLabel").data(x.ticks(5)).enter().append("svg:text").attr("class", "xLabel").text(String).attr("x", function(d) {
   return x(d)
 }).attr("y", h - 10).attr("text-anchor", "middle")
@@ -102,9 +78,9 @@ vis.selectAll(".yLabel").data(y.ticks(4)).enter().append("svg:text").attr("class
 }).attr("text-anchor", "right").attr("dy", 3)
 vis.selectAll(".xTicks").data(x.ticks(5)).enter().append("svg:line").attr("class", "xTicks").attr("x1", function(d) {
   return x(d);
-}).attr("y1", y(startAge)).attr("x2", function(d) {
+}).attr("y1", y(startPercent)).attr("x2", function(d) {
   return x(d);
-}).attr("y2", y(startAge) + 7)
+}).attr("y2", y(startPercent) + 7)
 vis.selectAll(".yTicks").data(y.ticks(4)).enter().append("svg:line").attr("class", "yTicks").attr("y1", function(d) {
   return y(d);
 }).attr("x1", x(1959.5)).attr("y2", function(d) {

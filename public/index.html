@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html>
+<html ng-app="vis">
 <head>
     <title>Internet Usage</title>
     <link rel=" stylesheet" type=" text/css" href="life.css"/>
@@ -8,21 +8,18 @@
     <script type=" text/javascript" src="d3.js?1.29.1"> </script>
     <script type=" text/javascript" src="d3.time.js?1.29.1"> </script>
     <script type=" text/javascript" src="d3.csv.js?1.29.1"> </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+    <script type=" text/javascript" src="app.js"> </script>
     <link href='http://fonts.googleapis.com/css?family=Bevan|Cardo' rel=' stylesheet' type=' text/css'>
     <link rel="stylesheet" type="text/css" href="//cloud.github.com/downloads/lafeber/world-flags-sprite/flags32.css"/>
 </head>
 <body>
 <div id="main-wrapper">
-    <div id="content">
+    <div id="content" ng-controller="GraphController as gc">
         <h1>Internet Usage </h1>
         <div id="filters">
-            <a id="EAS">East Asia and Pacific </a>
-            <a id="SAS">South Asia </a>
-            <a id="ECS">Europe and Central Asia </a>
-            <a id="MEA">Middle East and North Africa </a>
-            <a id="SSF">Sub-Saharan Africa </a>
-            <a id="LCN">Latin America and Caribbean </a>
-            <a id="NAC">North America </a>
+            <a ng-repeat="area in gc.areas" id="{{area.id}}">{{area.name}}</a>
+            
         </div>
         <div id="flags">
             <ul class="f32">
@@ -38,7 +35,7 @@
         <div id="vis"> </div>
     </div>
 </div>
-<script type="text/javascript" src="./life.js"></script>
+<!-- <script type="text/javascript" src="./life.js"></script> -->
 <script type=" text/javascript">
     $(document).ready(function() {
     $('#filters a').click(function() {

@@ -2,49 +2,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Life Expectancy </title>
-<link rel=" stylesheet" type=" text/css" href="life.css"/>
-<script type=" text/javascript" src="jquery-1.4.4.min.js"> </script>
-<script type=" text/javascript" src="d3.js?1.29.1"> </script>
-<script type=" text/javascript" src="d3.time.js?1.29.1"> </script>
-<script type=" text/javascript" src="d3.csv.js?1.29.1"> </script>
-<link href='http://fonts.googleapis.com/css?family=Bevan|Cardo' rel=' stylesheet' type=' text/css'>
+    <title>Internet Usage</title>
+    <link rel=" stylesheet" type=" text/css" href="life.css"/>
+    <script type=" text/javascript" src="jquery-1.4.4.min.js"> </script>
+    <script type=" text/javascript" src="d3.js?1.29.1"> </script>
+    <script type=" text/javascript" src="d3.time.js?1.29.1"> </script>
+    <script type=" text/javascript" src="d3.csv.js?1.29.1"> </script>
+    <link href='http://fonts.googleapis.com/css?family=Bevan|Cardo' rel=' stylesheet' type=' text/css'>
 </head>
 <body>
 <div id="main-wrapper">
-<div id="content">
-<div style=" text-align:right"> <a href="http://flowingdata.com"> <img src="logo-lone-square.gif" title=" FlowingData" width=" 50" height=" 50"/> </a> </div>
-<h1>Life Expectancy </h1>
-<p>People are living longer around the world, some more so than others. Select a region (as defined by World Bank) below to compare, or roll over to the graph to highlight countries. <a href="http://flowingdata.com/2011/10/13/life-expectancy-changes/">Read more... </a> </p>
-<div id="filters">
-<a id="EAS">East Asia and Pacific </a>
-<a id="SAS">South Asia </a>
-<a id="ECS">Europe and Central Asia </a>
-<a id="MEA">Middle East and North Africa </a>
-<a id="SSF">Sub-Saharan Africa </a>
-<a id="LCN">Latin America and Caribbean </a>
-<a id="NAC">North America </a>
-</div>
-<div id="blurb">
-<div id="default-blurb">
-<h2>World </h2>
-<p>The average life expectancy in the world in 2009 was 69 years. </p>
-</div>
-<div id="blurb-content"> </div>
-</div>
-<div id="vis"> </div>
-<div id="cite">Source: The World Bank; Graphic by: <a href="http://flowingdata.com">Nathan Yau </a> </div>
-</div>
+    <div id="content">
+        <h1>Internet Usage </h1>
+        <div id="filters">
+            <a id="EAS">East Asia and Pacific </a>
+            <a id="SAS">South Asia </a>
+            <a id="ECS">Europe and Central Asia </a>
+            <a id="MEA">Middle East and North Africa </a>
+            <a id="SSF">Sub-Saharan Africa </a>
+            <a id="LCN">Latin America and Caribbean </a>
+            <a id="NAC">North America </a>
+        </div>
+        <div id="blurb">
+            <div id="default-blurb"><h2>World </h2></div>
+            <div id="blurb-content"> </div>
+        </div>
+        <div id="vis"> </div>
+    </div>
 </div>
 <script type="text/javascript" src="./life.js"></script>
 <script type=" text/javascript">
-$(document).ready(function() {
-$('#filters a').click(function() {
-var countryId = $(this).attr("id");
-$(this).toggleClass(countryId);
-showRegion(countryId);
-});
-});
+    $(document).ready(function() {
+    $('#filters a').click(function() {
+    var countryId = $(this).attr("id");
+    $(this).toggleClass(countryId);
+    showRegion(countryId);
+    });
+    });
 </script>
 </body>
 </html>

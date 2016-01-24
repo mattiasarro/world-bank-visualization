@@ -64,11 +64,17 @@ var startEnd = {},
           }
         }
       }
-      vis.append("svg:path").data([currData]).attr("country", countries[i][1]).attr("class", countries_regions[countries[i][1]]).attr("d", line).on("mouseover", onmouseover).on("mouseout", onmouseout);
+      vis.append("svg:path")
+        .data([currData])
+        .attr("country", countries[i][1])
+        .attr("class", countries_regions[countries[i][1]])
+        .attr("d", line)
+        .on("mouseover", onmouseover)
+        .on("mouseout", onmouseout);
     }
   });
   
-vis.append("svg:line").attr("x1", x(1994)).attr("y1", y(startPercent)).attr("x2", x(2009)).attr("y2", y(startPercent)).attr("class", "axis")
+vis.append("svg:line").attr("x1", x(1994)).attr("y1", y(startPercent)).attr("x2", x(2013)).attr("y2", y(startPercent)).attr("class", "axis")
 vis.append("svg:line").attr("x1", x(startYear)).attr("y1", y(startPercent)).attr("x2", x(startYear)).attr("y2", y(endPercent)).attr("class", "axis")
 vis.selectAll(".xLabel").data(x.ticks(5)).enter().append("svg:text").attr("class", "xLabel").text(String).attr("x", function(d) {
   return x(d)
@@ -103,13 +109,9 @@ function onmouseover(d, i) {
   var countryVals = startEnd[countryCode];
   var percentChange = 100 * (countryVals['endVal'] - countryVals['startVal']) / countryVals['startVal'];
   var blurb = '<h2>' + countryCodes[countryCode] + '</h2>';
-  blurb += "<p>On average: a life expectancy of " + Math.round(countryVals['startVal']) + " years in " + countryVals['startYear'] + " and " + Math.round(countryVals['endVal']) + " years in " + countryVals['endYear'] + ", ";
-  if (percentChange >= 0) {
-    blurb += "an increase of " + Math.round(percentChange) + " percent."
-  } else {
-    blurb += "a decrease of " + -1 * Math.round(percentChange) + " percent."
-  }
-  blurb += "</p>";
+  blurb += "<p>"
+  blurb += "Internet usage grew from " + countryVals['startVal']  + " to " + countryVals['endVal'] + " per cent in " + countryVals['startYear'] + "-" + countryVals['endYear'] + ".";
+  blurb += "</p>"
   $("#default-blurb").hide();
   $("#blurb-content").html(blurb);
 }

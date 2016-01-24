@@ -74,24 +74,36 @@ var startEnd = {},
     }
   });
   
-vis.append("svg:line").attr("x1", x(1994)).attr("y1", y(startPercent)).attr("x2", x(2013)).attr("y2", y(startPercent)).attr("class", "axis")
-vis.append("svg:line").attr("x1", x(startYear)).attr("y1", y(startPercent)).attr("x2", x(startYear)).attr("y2", y(endPercent)).attr("class", "axis")
-vis.selectAll(".xLabel").data(x.ticks(5)).enter().append("svg:text").attr("class", "xLabel").text(String).attr("x", function(d) {
-  return x(d)
-}).attr("y", h - 10).attr("text-anchor", "middle")
-vis.selectAll(".yLabel").data(y.ticks(4)).enter().append("svg:text").attr("class", "yLabel").text(String).attr("x", 0).attr("y", function(d) {
-  return y(d)
-}).attr("text-anchor", "right").attr("dy", 3)
-vis.selectAll(".xTicks").data(x.ticks(5)).enter().append("svg:line").attr("class", "xTicks").attr("x1", function(d) {
-  return x(d);
-}).attr("y1", y(startPercent)).attr("x2", function(d) {
-  return x(d);
-}).attr("y2", y(startPercent) + 7)
-vis.selectAll(".yTicks").data(y.ticks(4)).enter().append("svg:line").attr("class", "yTicks").attr("y1", function(d) {
-  return y(d);
-}).attr("x1", x(1959.5)).attr("y2", function(d) {
-  return y(d);
-}).attr("x2", x(1960))
+vis.append("svg:line").attr("x1", x(startYear)).attr("y1", y(startPercent))
+                      .attr("x2", x(endYear)).attr("y2", y(startPercent))
+                      .attr("class", "axis"); // x-axis
+vis.append("svg:line").attr("x1", x(startYear)).attr("y1", y(startPercent))
+                      .attr("x2", x(startYear)).attr("y2", y(endPercent))
+                      .attr("class", "axis"); // y-axis
+vis.selectAll(".xLabel").data(x.ticks(5))
+                        .enter().append("svg:text")
+                        .attr("class", "xLabel")
+                        .text(String).attr("x", function(d) { return x(d) })
+                        .attr("y", h - 10).attr("text-anchor", "middle");
+vis.selectAll(".yLabel").data(y.ticks(4))
+                        .enter().append("svg:text")
+                        .attr("class", "yLabel")
+                        .text(String).attr("x", 0).attr("y", function(d) { return y(d) })
+                        .attr("text-anchor", "right").attr("dy", 3);
+vis.selectAll(".xTicks").data(x.ticks(5))
+                        .enter().append("svg:line")
+                        .attr("class", "xTicks")
+                        .attr("x1", x)
+                        .attr("y1", y(startPercent))
+                        .attr("x2", x)
+                        .attr("y2", y(startPercent) + 7);
+vis.selectAll(".yTicks").data(y.ticks(4))
+                        .enter().append("svg:line")
+                        .attr("class", "yTicks")
+                        .attr("y1", y)
+                        .attr("x1", x(1959.5))
+                        .attr("y2", y)
+                        .attr("x2", x(1960));
 
 function onclick(d, i) {
   var currClass = d3.select(this).attr("class");

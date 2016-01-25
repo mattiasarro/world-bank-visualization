@@ -50,12 +50,9 @@ vis.directive("graph", function() {
         var vis = d3.select(element[0]).append("svg:svg")
                                        .attr("width", width).attr("height", height)
                                        .append("svg:g");
-        var line = d3.svg.line().x(function(d, i) {
-            // console.log(d.x, x(d.x));
-            return x(d.x);
-        }).y(function(d) {
-            return y(d.y);
-        });
+        var line = d3.svg.line()
+                    .x(function(d) { return x(d.x) })
+                    .y(function(d) { return y(d.y) });
         var countries_regions = {};
         d3.text('country-regions.csv', 'text/csv', function(text) {
           var regions = d3.csv.parseRows(text);
@@ -72,6 +69,9 @@ vis.directive("graph", function() {
               countries[i] = countries[i].slice(2, countries[i.length - 1]);
             } 
             
+            function getVal(idx) {
+                return(values[j] == ".." ? 0 : values[j]);
+            }
             
             for (i = 1; i < countries.length; i++) {
               // console.log("--", values);
@@ -80,20 +80,20 @@ vis.directive("graph", function() {
               countryCodes[countries[i][1]] = countries[i][0];
               var started = false;
               for (j = 0; j < values.length; j++) {
-                if (values[j] != '') {
+                if (getVal(j) != '') {
                   currData.push({
                     x: years[j],
-                    y: values[j]
+                    y: getVal(j)
                   });
                   if (!started) {
                     startEnd[countries[i][1]] = {
                       'startYear': years[j],
-                      'startVal': values[j]
+                      'startVal': getVal(j)
                     };
                     started = true;
                   } else if (j == values.length - 1) {
                     startEnd[countries[i][1]]['endYear'] = years[j];
-                    startEnd[countries[i][1]]['endVal'] = values[j];
+                    startEnd[countries[i][1]]['endVal'] = getVal(j);
                   }
                 }
               }

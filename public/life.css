@@ -37,34 +37,44 @@ a {
   cursor: pointer;
   margin-right: 3px;
 }
+#filters a.SAS-hidden, 
+#filters a.ECS-hidden, 
+#filters a.MEA-hidden, 
+#filters a.SSF-hidden, 
+#filters a.LCN-hidden, 
+#filters a.EAS-hidden, 
+#filters a.NAC-hidden {
+    background: #FFFFFF;
+    
+}
 #filters a:last-child {
   margin-right: 0;
 }
-#filters a.SAS {
+#filters a.SAS-highlighted {
   background: #895881;
   color: #fff;
 }
-#filters a.ECS {
+#filters a.ECS-highlighted {
   background: #ED7C31;
   color: #fff;
 }
-#filters a.MEA {
+#filters a.MEA-highlighted {
   background: #82A5C0;
   color: #fff;
 }
-#filters a.SSF {
+#filters a.SSF-highlighted {
   background: #6E9E75;
   color: #fff;
 }
-#filters a.LCN {
+#filters a.LCN-highlighted {
   background: #00BBD6;
   color: #fff;
 }
-#filters a.EAS {
+#filters a.EAS-highlighted {
   background: #e25f82;
   color: #fff;
 }
-#filters a.NAC {
+#filters a.NAC-highlighted {
   background: #be1932;
   color: #fff;
 }

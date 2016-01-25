@@ -18,7 +18,10 @@
     <div id="content" ng-controller="GraphController as gc">
         <h1>Internet Usage </h1>
         <div id="filters">
-            <a ng-repeat="area in gc.areas" id="{{area.id}}">{{area.name}}</a>
+            <a ng-repeat="(id, region) in gc.regions" 
+               id="{{id}}" 
+               class="{{id}}-{{region.state}}"
+               ng-click="gc.toggleRegion(id)">{{region.name}}</a>
             
         </div>
         <div id="flags">
@@ -32,18 +35,9 @@
             <div id="default-blurb"><h2>World </h2></div>
             <div id="blurb-content"> </div>
         </div>
-        <div id="vis"> </div>
+        <div id="vis" graph></div>
     </div>
 </div>
 <!-- <script type="text/javascript" src="./life.js"></script> -->
-<script type=" text/javascript">
-    $(document).ready(function() {
-    $('#filters a').click(function() {
-    var countryId = $(this).attr("id");
-    $(this).toggleClass(countryId);
-    showRegion(countryId);
-    });
-    });
-</script>
 </body>
 </html>

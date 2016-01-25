@@ -15,10 +15,10 @@
 </head>
 <body>
 <div id="main-wrapper">
-    <div id="content" ng-controller="GraphController as gc">
+    <div id="content" ng-controller="GraphController">
         <h1>Internet Usage </h1>
         <div id="filters">
-            <a ng-repeat="(id, region) in gc.regions" 
+            <a ng-repeat="(id, region) in regions" 
                id="{{id}}" 
                class="{{id}}-{{region.state}}"
                ng-click="gc.toggleRegion(id)">{{region.name}}</a>
@@ -32,10 +32,9 @@
             </ul>
         </div>
         <div id="blurb">
-            <div id="default-blurb"><h2></h2></div>
             <div id="blurb-content"> </div>
         </div>
-        <div id="vis" graph></div>
+        <div id="vis" graph data="data"></div>
     </div>
 </div>
 <!-- <script type="text/javascript" src="./life.js"></script> -->

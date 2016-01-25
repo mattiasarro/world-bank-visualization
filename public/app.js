@@ -1,8 +1,13 @@
 vis = angular.module('vis', []);
 
-vis.controller('GraphController', function() {
-        var graph = this;
-        graph.regions = {
+vis.controller('GraphController', function($scope, $http) {
+        $scope.limits = {
+            startYear: 1994,
+            endYear: 2014,
+            startPercent: 0,
+            endPercent: 100
+        }
+        $scope.regions = {
             "ECS": {name: "Europe and Central Asia", state: "visible"},
             "NAC": {name: "North America", state: "visible"},
             "LCN": {name: "Latin America & Caribbean", state: "visible"},
@@ -12,7 +17,31 @@ vis.controller('GraphController', function() {
             "SSF": {name: "Sub-Saharan Africa", state: "visible"},
         };
         
-        graph.toggleRegion = function(id) {
+        
+        $scope.countriesRegions = {};
+        
+        $http.get('country-regions.csv').success(function(text) {
+            var regions = d3.csv.parseRows(text);
+            for (i = 1; i < regions.length; i++) {
+              $scope.countriesRegions[regions[i][0]] = regions[i][1];
+            }
+        });
+
+
+        $scope.countryCodes = {};
+        $scope.data = {};
+
+        $http.get('internet-usage-countries.csv').success(function(text) {
+            var countries = d3.csv.parseRows(text);
+            for (i = 1; i < countries.length; i++) {
+                var values = countries[i].slice(4, countries[i.length - 1]);
+                $scope.countryCodes[countries[i][3]] = countries[i][2];
+                $scope.data[countries[i][3]] = values;
+            }
+        });
+
+        
+        $scope.toggleRegion = function(id) {
             var countries = d3.selectAll("path." + id);
             switch(graph.regions[id]["state"]) {
                 case "hidden":
@@ -35,14 +64,16 @@ vis.controller('GraphController', function() {
 
 vis.directive("graph", function() {
     function link(scope, element, attr) {
-        console.log("-- graph");
         var width = 925;
         var height = 550;
         var margin = 30;
-        var startYear = 1994;
-        var endYear = 2014;
-        var startPercent = 0;
-        var endPercent = 100;
+        
+        var startYear = scope.$parent.limits.startYear;
+        var endYear = scope.$parent.limits.endYear;
+        var startPercent = scope.$parent.limits.startPercent;
+        var endPercent = scope.$parent.limits.endPercent;
+        
+        var countries_regions = scope.$parent.countriesRegions;
         
         var y = d3.scale.linear().domain([endPercent, startPercent]).range([0 + margin, height - margin]);
         var x = d3.scale.linear().domain([startYear, endYear]).range([0 + margin - 5, width]);
@@ -50,69 +81,14 @@ vis.directive("graph", function() {
         var vis = d3.select(element[0]).append("svg:svg")
                                        .attr("width", width).attr("height", height)
                                        .append("svg:g");
-        var line = d3.svg.line()
-                    .x(function(d) { return x(d.x) })
-                    .y(function(d) { return y(d.y) });
-        var countries_regions = {};
-        d3.text('country-regions.csv', 'text/csv', function(text) {
-          var regions = d3.csv.parseRows(text);
-          for (i = 1; i < regions.length; i++) {
-            countries_regions[regions[i][0]] = regions[i][1];
-          }
-        });
-        var startEnd = {},
-          countryCodes = {};
+        var line = d3.svg.line().x(function(d) { return x(d.x) })
+                                .y(function(d) { return y(d.y) });
+        
+        var xPoints = [[ {x: startYear, y: startPercent} , {x: endYear, y: startPercent} ]]; // not sure why array inside array necessary
+        var yPoints = [[ {x: startYear, y: startPercent} , {x: startYear, y: endPercent} ]];
+        vis.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis"); // x-axis
+        vis.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis"); // y-axis
 
-          d3.text('internet-usage-countries.csv', 'text/csv', function(text) {
-            var countries = d3.csv.parseRows(text);
-            for (i = 1; i < countries.length; i++) {
-              countries[i] = countries[i].slice(2, countries[i.length - 1]);
-            } 
-            
-            function getVal(idx) {
-                return(values[j] == ".." ? 0 : values[j]);
-            }
-            
-            for (i = 1; i < countries.length; i++) {
-              // console.log("--", values);
-              var values = countries[i].slice(2, countries[i.length - 1]);
-              var currData = [];
-              countryCodes[countries[i][1]] = countries[i][0];
-              var started = false;
-              for (j = 0; j < values.length; j++) {
-                if (getVal(j) != '') {
-                  currData.push({
-                    x: years[j],
-                    y: getVal(j)
-                  });
-                  if (!started) {
-                    startEnd[countries[i][1]] = {
-                      'startYear': years[j],
-                      'startVal': getVal(j)
-                    };
-                    started = true;
-                  } else if (j == values.length - 1) {
-                    startEnd[countries[i][1]]['endYear'] = years[j];
-                    startEnd[countries[i][1]]['endVal'] = getVal(j);
-                  }
-                }
-              }
-              vis.append("svg:path")
-                .data([currData])
-                .attr("country", countries[i][1])
-                .attr("class", countries_regions[countries[i][1]])
-                .attr("d", line)
-                .on("mouseover", onmouseover)
-                .on("mouseout", onmouseout);
-            }
-          });
-          
-        vis.append("svg:line").attr("x1", x(startYear)).attr("y1", y(startPercent))
-                              .attr("x2", x(endYear)).attr("y2", y(startPercent))
-                              .attr("class", "axis"); // x-axis
-        vis.append("svg:line").attr("x1", x(startYear)).attr("y1", y(startPercent))
-                              .attr("x2", x(startYear)).attr("y2", y(endPercent))
-                              .attr("class", "axis"); // y-axis
         vis.selectAll(".xLabel").data(x.ticks(5))
                                 .enter().append("svg:text")
                                 .attr("class", "xLabel")
@@ -134,9 +110,30 @@ vis.directive("graph", function() {
                                 .enter().append("svg:line")
                                 .attr("class", "yTicks")
                                 .attr("y1", y)
-                                .attr("x1", x(1959.5))
+                                .attr("x1", x(startYear - 0.1))
                                 .attr("y2", y)
-                                .attr("x2", x(1960));
+                                .attr("x2", x(startYear));
+
+        scope.$watch('data', function(countryData) {
+            angular.forEach(countryData, function(data, countryCode) {
+                currData = [];
+                for (j = 0; j < data.length; j++) {
+                    if (data[j] != '' && data[j] != '..') {
+                        currData.push({
+                            x: years[j],
+                            y: data[j]
+                        });
+                    }
+                }
+                vis.append("svg:path")
+                .data([currData])
+                .attr("country", countryCode)
+                .attr("class", countries_regions[countryCode])
+                .attr("d", line)
+                .on("mouseover", onmouseover)
+                .on("mouseout", onmouseout);
+            });
+        }, true);
 
         function onclick(d, i) {
           var currClass = d3.select(this).attr("class");
@@ -151,13 +148,7 @@ vis.directive("graph", function() {
           var currClass = d3.select(this).attr("class");
           d3.select(this).attr("class", currClass + " current");
           var countryCode = $(this).attr("country");
-          var countryVals = startEnd[countryCode];
-          var percentChange = 100 * (countryVals['endVal'] - countryVals['startVal']) / countryVals['startVal'];
           var blurb = '<h2>' + countryCodes[countryCode] + '</h2>';
-          blurb += "<p>"
-          blurb += "Internet usage grew from " + countryVals['startVal']  + " to " + countryVals['endVal'] + " per cent in " + countryVals['startYear'] + "-" + countryVals['endYear'] + ".";
-          blurb += "</p>"
-          $("#default-blurb").hide();
           $("#blurb-content").html(blurb);
         }
 
@@ -173,6 +164,6 @@ vis.directive("graph", function() {
     return {
         link: link,
         restrict: 'A',
-        scope: { dimensions: '=' }
+        scope: { data: '=' }
     }
 });

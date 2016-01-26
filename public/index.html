@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html ng-app="vis">
+<html ng-app="app">
 <head>
     <title>Internet Usage</title>
     <script type=" text/javascript" src="vendor/jquery-1.4.4.min.js"> </script>
@@ -27,15 +27,19 @@
         </div>
         <div id="flags">
             <ul class="f16">
-              <li ng-repeat="(code, country) in countries" 
+              <li ng-repeat="(countryCode, country) in countries" 
                   class="flag {{country.codeAlpha2 | lowercase}} 
-                         flag-{{country.state}}-{{country.regionCode}}"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>
+                         flag-{{country.state}}-{{country.regionCode}}
+                         flag-active-{{country.active}}"
+                  ng-click="toggleCountry(country)"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>
             </ul>
         </div>
-        <div id="blurb">
-            <div id="blurb-content">{{blurb}}</div>
-        </div>
-        <div id="vis" graph countries="countries" blurb="blurb" limits="limits"></div>
+        <div graph 
+             id="vis"
+             countries="countries" 
+             setCurrent="setCurrent" 
+             unsetCurrent="unsetCurrent" 
+             limits="limits"></div>
     </div>
 </div>
 <!-- <script type="text/javascript" src="./life.js"></script> -->

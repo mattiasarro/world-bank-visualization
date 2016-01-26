@@ -81,23 +81,24 @@ a {
 #vis {
   min-height: 550px;
 }
-#blurb {
-  height: 18px;
-  font-size:18px;
-  padding-top: 10px;
-  border-top: 1px solid #e2e2e2;
+.countryName {
+    opacity: 0;
 }
+.countryNameActive {
+    opacity: 1;
+}
+
 path {
   stroke: #e2e2e2;
   stroke-width: 0.9;
   fill: none;
 }
-path.current, path.highlighted.current {
+path.active, path.highlighted.active {
   stroke: #000;
   stroke-width: 1.7;
 }
 .flag {
-    border: 1px solid white;
+    border: 2px solid white;
 }
 .flag-hidden-SAS, 
 .flag-hidden-ECS, 
@@ -107,47 +108,50 @@ path.current, path.highlighted.current {
 .flag-hidden-EAS, 
 .flag-hidden-NAC {
 } 
+.flag-active-true {
+    border: 2px solid black;
+}
 .SAS.highlighted {
   stroke: #895881;
 }
 .flag-highlighted-SAS {
-    border: 1px solid #895881;
+    border: 2px solid #895881;
 }
 .ECS.highlighted {
   stroke: #ED7C31;
 }
 .flag-highlighted-ECS {
-    border: 1px solid #ED7C31;
+    border: 2px solid #ED7C31;
 }
 .MEA.highlighted {
   stroke: #82A5C0;
 }
 .flag-highlighted-MEA {
-    border: 1px solid #82A5C0;
+    border: 2px solid #82A5C0;
 }
 .SSF.highlighted {
   stroke: #6E9E75;
 }
 .flag-highlighted-SSF {
-    border: 1px solid #6E9E75;
+    border: 2px solid #6E9E75;
 }
 .LCN.highlighted {
   stroke: #00BBD6;
 }
 .flag-highlighted-LCN {
-    border: 1px solid #00BBD6;
+    border: 2px solid #00BBD6;
 }
 .EAS.highlighted {
   stroke: #e25f82;
 }
 .flag-highlighted-EAS {
-    border: 1px solid #e25f82;
+    border: 2px solid #e25f82;
 }
 .NAC.highlighted {
   stroke: #be1932;
 }
 .flag-highlighted-NAC {
-    border: 1px solid #be1932;
+    border: 2px solid #be1932;
 }
 .highlighted {
   stroke-width: 1px;

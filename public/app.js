@@ -20,7 +20,7 @@ vis.controller('GraphController', function($scope, $http) {
         };
 
         $scope.blurb = "";
-        $scope.countries = {}; // {code: {code: "", name: "", region: "", dataPoints: []}}
+        $scope.countries = {};
         
         $http.get('country-regions.csv').success(function(text) {
             var countriesRegions = {};
@@ -52,8 +52,9 @@ vis.controller('GraphController', function($scope, $http) {
                             code: countryCode,
                             codeAlpha2: alpha2,
                             name: row[i][2],
-                            region: countriesRegions[countryCode],
+                            region: countriesRegions[countryCode], // ECS | NAN, etc
                             current: false,
+                            state: "visible", // highlighted | hidden
                             dataPoints: dataPoints
                         };
                     }
@@ -61,25 +62,26 @@ vis.controller('GraphController', function($scope, $http) {
             });
         });
 
+        $scope.toggleCountry = function(id) {}
         
-        $scope.toggleRegion = function(id) {
-            var countries = d3.selectAll("path." + id);
-            switch($scope.regions[id]["state"]) {
-                case "hidden":
-                    countries.style("visibility", "visible");
-                    $scope.regions[id]["state"] = "visible";
-                break;
-                
-                case "visible":
-                    countries.classed('highlight', true);
-                    $scope.regions[id]["state"] = "highlighted";
-                break;
-                case "highlighted":
-                    countries.classed('highlight', false);
-                    countries.style("visibility", "hidden");
-                    $scope.regions[id]["state"] = "hidden";
-                break;
+        $scope.toggleRegion = function(regionCode) {
+            var mapping = {
+                "hidden": "visible",
+                "visible": "highlighted",
+                "highlighted": "hidden"
             }
+            var currentState = $scope.regions[regionCode]["state"];
+            var newState = mapping[currentState];
+            setState(regionCode, newState, $scope);
+        }
+        
+        function setState(regionCode, state, $scope) {
+            $scope.regions[regionCode]["state"] = state;
+            angular.forEach($scope.countries, function(country, countryCode) {
+                if (country.region == regionCode) {
+                    country.state = state;   
+                }
+            });
         }
 });
 
@@ -155,6 +157,8 @@ vis.directive("graph", function() {
                          .classed("current", function(d) { return d.current })
                          .attr("country", function(d) { return(d.code) })
                          .attr("d", function(d) { return countryLine(d.dataPoints) })
+                         .style("visibility", function(d) { return(d.state) }) // if "highlighted", just interpreted as visible
+                         .classed('highlighted', function(d) { return(d.state == "highlighted" ? true : false) })
                          .on("mouseover", activate)
                          .on("mouseout", deactivate);
             }

@@ -92,32 +92,56 @@ path {
   stroke-width: 0.9;
   fill: none;
 }
-path.current, path.highlight.current {
+path.current, path.highlighted.current {
   stroke: #000;
   stroke-width: 1.7;
 }
-.SAS.highlight {
+.flag {
+    border: 1px solid white;
+}
+.SAS.highlighted {
   stroke: #895881;
 }
-.ECS.highlight {
+.flag-highlighted-SAS {
+    border: 1px solid #895881;
+}
+.ECS.highlighted {
   stroke: #ED7C31;
 }
-.MEA.highlight {
+.flag-highlighted-ECS {
+    border: 1px solid #ED7C31;
+}
+.MEA.highlighted {
   stroke: #82A5C0;
 }
-.SSF.highlight {
+.flag-highlighted-MEA {
+    border: 1px solid #82A5C0;
+}
+.SSF.highlighted {
   stroke: #6E9E75;
 }
-.LCN.highlight {
+.flag-highlighted-SSF {
+    border: 1px solid #6E9E75;
+}
+.LCN.highlighted {
   stroke: #00BBD6;
 }
-.EAS.highlight {
+.flag-highlighted-LCN {
+    border: 1px solid #00BBD6;
+}
+.EAS.highlighted {
   stroke: #e25f82;
 }
-.NAC.highlight {
+.flag-highlighted-EAS {
+    border: 1px solid #e25f82;
+}
+.NAC.highlighted {
   stroke: #be1932;
 }
-.highlight {
+.flag-highlighted-NAC {
+    border: 1px solid #be1932;
+}
+.highlighted {
   stroke-width: 1px;
 }
 line {

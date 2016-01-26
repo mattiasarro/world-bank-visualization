@@ -21,7 +21,7 @@
             <a ng-repeat="(id, region) in regions" 
                id="{{id}}" 
                class="{{id}}-{{region.state}}"
-               ng-click="gc.toggleRegion(id)">{{region.name}}</a>
+               ng-click="toggleRegion(id)">{{region.name}}</a>
             
         </div>
         <div id="flags">
@@ -32,9 +32,9 @@
             </ul>
         </div>
         <div id="blurb">
-            <div id="blurb-content"> </div>
+            <div id="blurb-content">{{blurb}}</div>
         </div>
-        <div id="vis" graph data="data"></div>
+        <div id="vis" graph countries="countries" blurb="blurb"></div>
     </div>
 </div>
 <!-- <script type="text/javascript" src="./life.js"></script> -->

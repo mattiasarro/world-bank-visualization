@@ -136,33 +136,32 @@ vis.directive("graph", function() {
                 data.push(country);
             });
             
-            var countryLines = vis.selectAll("path.country-line").data(data, function(d) { return d.code; });
-            countryLines.enter().append("svg:path")
-                                .classed("current", function(d) { return d.current })
-                                .attr("class", function(d) { return(d.region) })
-                                .attr("country", function(d) { return(d.code) })
-                                .attr("d", function(d) { return countryLine(d.dataPoints) })
-                                .on("mouseover", activate)
-                                .on("mouseout", deactivate);
+            var countryLines = vis.selectAll("path.country-line").data(data, function(d) { return(d.code); });
+            defineBehavior(countryLines);
+            defineBehavior(countryLines.enter().append("svg:path"));
             countryLines.exit().remove();
+            
+            function defineBehavior(selection) { // since behavior is same for enter() and update(), pull it into a function
+                selection.attr("class", function(d) { return(d.region + " country-line") })
+                         .classed("current", function(d) { return d.current })
+                         .attr("country", function(d) { return(d.code) })
+                         .attr("d", function(d) { console.log("enter " + d.code); return countryLine(d.dataPoints) })
+                         .on("mouseover", activate)
+                         .on("mouseout", deactivate);
+            }
         }, true);
 
         function activate(d, i) {
-            // console.log(d);
-            // d.current = true;
-            // console.log(d);
-            // d3.select(this).data(d);
             scope.$apply(function(){
                 scope.blurb = d.name;
+                scope.countries[d.code].current = true;
             });
         }
 
         function deactivate(d, i) {
-            // d.current = false;
-            // d3.select(this).data(d);
-        //   d3.select(this).classed("current", false);
           scope.$apply(function(){
               scope.blurb = "";
+              scope.countries[d.code].current = false;
           });
         }
         

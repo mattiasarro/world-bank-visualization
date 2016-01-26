@@ -99,6 +99,14 @@ path.current, path.highlighted.current {
 .flag {
     border: 1px solid white;
 }
+.flag-hidden-SAS, 
+.flag-hidden-ECS, 
+.flag-hidden-MEA, 
+.flag-hidden-SSF, 
+.flag-hidden-LCN, 
+.flag-hidden-EAS, 
+.flag-hidden-NAC {
+} 
 .SAS.highlighted {
   stroke: #895881;
 }

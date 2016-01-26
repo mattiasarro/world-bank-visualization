@@ -29,7 +29,7 @@
             <ul class="f16">
               <li ng-repeat="(code, country) in countries" 
                   class="flag {{country.codeAlpha2 | lowercase}} 
-                         flag-{{country.state}}-{{country.regionCode}}"></li>
+                         flag-{{country.state}}-{{country.regionCode}}"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>
             </ul>
         </div>
         <div id="blurb">

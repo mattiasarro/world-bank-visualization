@@ -18,7 +18,7 @@ vis.controller('GraphController', function($scope, $http) {
             "MEA": {name: "Middle East & North Africa", state: "visible"},
             "SSF": {name: "Sub-Saharan Africa", state: "visible"},
         };
-        
+
         $scope.blurb = "";
         $scope.countries = {}; // {code: {code: "", name: "", region: "", dataPoints: []}}
         
@@ -45,13 +45,18 @@ vis.controller('GraphController', function($scope, $http) {
                         }
                     }
                     
-                    $scope.countries[countryCode] = {
-                        code: countryCode,
-                        name: row[i][2],
-                        region: countriesRegions[countryCode],
-                        current: false,
-                        dataPoints: dataPoints
-                    };
+                    var alpha2 = iso_3366_1_Alpha3_to_Alpha2[countryCode];
+                    
+                    if (alpha2 != undefined) {
+                        $scope.countries[countryCode] = {
+                            code: countryCode,
+                            codeAlpha2: alpha2,
+                            name: row[i][2],
+                            region: countriesRegions[countryCode],
+                            current: false,
+                            dataPoints: dataPoints
+                        };
+                    }
                 }
             });
         });
@@ -149,7 +154,7 @@ vis.directive("graph", function() {
                 selection.attr("class", function(d) { return(d.region + " country-line") })
                          .classed("current", function(d) { return d.current })
                          .attr("country", function(d) { return(d.code) })
-                         .attr("d", function(d) { console.log("enter " + d.code); return countryLine(d.dataPoints) })
+                         .attr("d", function(d) { return countryLine(d.dataPoints) })
                          .on("mouseover", activate)
                          .on("mouseout", deactivate);
             }

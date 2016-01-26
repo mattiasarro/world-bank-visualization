@@ -82,9 +82,10 @@ a {
   min-height: 550px;
 }
 #blurb {
-  height: 60px;
+  height: 18px;
+  font-size:18px;
+  padding-top: 10px;
   border-top: 1px solid #e2e2e2;
-  padding-top: 20px;
 }
 path {
   stroke: #e2e2e2;

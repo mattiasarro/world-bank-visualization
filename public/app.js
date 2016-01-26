@@ -61,24 +61,9 @@ app.controller('GraphController', function($scope, $http) {
             });
         });
 
-        $scope.toggleCountry = function(country) {
+        $scope.togglePermaActive = function(country) {
             $scope.countries[country.code].active = !$scope.countries[country.code].active;
             $scope.countries[country.code].activePersistent = !$scope.countries[country.code].activePersistent;
-        }
-        
-        
-        $scope.setCurrent = function (d) { 
-            if (d.activePersistent) { return; }
-            $scope.$apply(function(){ // needed since this func used by D3
-                $scope.countries[d.code].active = true;
-            });
-        }
-        
-        $scope.unsetCurrent = function(d) {
-            if (d.activePersistent) { return; }
-            $scope.$apply(function(){ // needed since this func used by D3
-                $scope.countries[d.code].active = false;
-            });
         }
         
         $scope.toggleRegion = function(regionCode) {
@@ -187,8 +172,30 @@ app.directive("graph", function() {
                          .attr("d", function(d) { return countryLine(d.dataPoints) })
                          .style("visibility", function(d) { return(d.state) }) // if "highlighted", just interpreted as visible
                          .classed('highlighted', function(d) { return(d.state == "highlighted" ? true : false) })
-                         .on("mouseover", scope.$parent.setCurrent)
-                         .on("mouseout", scope.$parent.unsetCurrent);
+                         .on("click", togglePermaActive)
+                         .on("mouseover", setActive)
+                         .on("mouseout", unsetActive);             
+            }
+            
+            function togglePermaActive(d) {
+                scope.$apply(function() { 
+                    scope.$parent.countries[d.code].active = false;
+                    scope.$parent.togglePermaActive(d);
+                });
+            }
+            
+            function setActive(d) { 
+                if (d.activePersistent) { return; }
+                scope.$apply(function() { 
+                    scope.$parent.countries[d.code].active = true;
+                });
+            }
+            
+            function unsetActive(d) {
+                if (d.activePersistent) { return; }
+                scope.$apply(function() { 
+                    scope.$parent.countries[d.code].active = false;
+                });
             }
         }, true);
         
@@ -196,6 +203,6 @@ app.directive("graph", function() {
     return {
         link: link,
         restrict: 'A',
-        scope: { countries: '=', limits: '=', setCurrent: '=', unsetCurrent: '=' }
+        scope: { countries: '=', limits: '=' }
     }
 });

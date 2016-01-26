@@ -24,9 +24,9 @@ vis.controller('GraphController', function($scope, $http) {
         
         $http.get('country-regions.csv').success(function(text) {
             var countriesRegions = {};
-            var regions = d3.csv.parseRows(text);
-            for (i = 1; i < regions.length; i++) {
-              countriesRegions[regions[i][0]] = regions[i][1];
+            var rows = d3.csv.parseRows(text);
+            for (i = 1; i < rows.length; i++) {
+              countriesRegions[rows[i][0]] = rows[i][1];
             }
 
             $http.get('internet-usage-countries.csv').success(function(text) {
@@ -52,7 +52,7 @@ vis.controller('GraphController', function($scope, $http) {
                             code: countryCode,
                             codeAlpha2: alpha2,
                             name: row[i][2],
-                            region: countriesRegions[countryCode], // ECS | NAN, etc
+                            regionCode: countriesRegions[countryCode], // ECS | NAN, etc
                             current: false,
                             state: "visible", // highlighted | hidden
                             dataPoints: dataPoints
@@ -78,7 +78,7 @@ vis.controller('GraphController', function($scope, $http) {
         function setState(regionCode, state, $scope) {
             $scope.regions[regionCode]["state"] = state;
             angular.forEach($scope.countries, function(country, countryCode) {
-                if (country.region == regionCode) {
+                if (country.regionCode == regionCode) {
                     country.state = state;   
                 }
             });
@@ -153,7 +153,7 @@ vis.directive("graph", function() {
             countryLines.exit().remove();
             
             function defineBehavior(selection) { // since behavior is same for enter() and update(), pull it into a function
-                selection.attr("class", function(d) { return(d.region + " country-line") })
+                selection.attr("class", function(d) { return(d.regionCode + " country-line") })
                          .classed("current", function(d) { return d.current })
                          .attr("country", function(d) { return(d.code) })
                          .attr("d", function(d) { return countryLine(d.dataPoints) })

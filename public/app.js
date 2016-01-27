@@ -84,140 +84,6 @@ app.controller('GraphController', function($scope, $http) {
     }
 });
 
-app.directive("graph", function() {
-    function link(scope, element, attr) {
-        var width = 925;
-        var height = 550;
-        var margin = 30;
-        var rightMargin = 150;
-        
-        var y,x,years,endYear, vis,line,countryLine;
-        
-        scope.$watch('limits', function() {
-            var startYear = scope.limits.startYear;
-                endYear = scope.limits.endYear;
-            var startPercent = scope.limits.startPercent;
-            var endPercent = scope.limits.endPercent;
-                    
-            y = d3.scale.linear().domain([endPercent, startPercent]).range([0 + margin, height - margin]);
-            x = d3.scale.linear().domain([startYear, endYear]).range([0 + margin - 5, width]);
-            years = d3.range(startYear, endYear+1);
-            vis = d3.select(element[0]).append("svg:svg")
-                                        .attr("width", width + rightMargin).attr("height", height)
-                                        .append("svg:g");
-            line = d3.svg.line().x(function(d) { return x(d.x) })
-                                .y(function(d) { return y(d.y) });
-            countryLine = d3.svg.line().x(function(d) { return x(years[d.yearIndex]) })
-                                       .y(function(d) { return y(d.perCent) });
-            
-            var xPoints = [[ {x: startYear, y: startPercent} , {x: endYear, y: startPercent} ]]; // not sure why array inside array necessary
-            var yPoints = [[ {x: startYear, y: startPercent} , {x: startYear, y: endPercent} ]];
-            vis.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis"); // x-axis
-            vis.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis"); // y-axis
-
-            vis.selectAll(".xLabel").data(x.ticks(5))
-                                    .enter().append("svg:text")
-                                    .attr("class", "xLabel")
-                                    .text(String).attr("x", x)
-                                    .attr("y", height - 10).attr("text-anchor", "middle");
-            vis.selectAll(".yLabel").data(y.ticks(4))
-                                    .enter().append("svg:text")
-                                    .attr("class", "yLabel")
-                                    .text(String).attr("x", 0).attr("y", y)
-                                    .attr("text-anchor", "right").attr("dy", 3);
-            vis.selectAll(".xTicks").data(x.ticks(5))
-                                    .enter().append("svg:line")
-                                    .attr("class", "xTicks")
-                                    .attr("x1", x)
-                                    .attr("y1", y(startPercent))
-                                    .attr("x2", x)
-                                    .attr("y2", y(startPercent) + 7);
-            vis.selectAll(".yTicks").data(y.ticks(4))
-                                    .enter().append("svg:line")
-                                    .attr("class", "yTicks")
-                                    .attr("y1", y)
-                                    .attr("x1", x(startYear - 0.1))
-                                    .attr("y2", y)
-                                    .attr("x2", x(startYear));
-        });
-        
-        scope.$watch('year', function(year) {
-            var selectedPoints = [[ {x: scope.$parent.year, y: scope.limits.startPercent} , 
-                                    {x: scope.$parent.year, y: scope.limits.endPercent} ]];
-            var sel = vis.selectAll("path.year")
-                         .data(selectedPoints, function(d){ return 1 })
-                         .attr("d", line);
-            
-            sel.enter().append("svg:path")
-               .attr("d", line)
-               .attr("class", "axis year");
-        });
-        
-        scope.$watch('countries', function(countries) {
-            var data = [];
-            angular.forEach(countries, function(country, countryCode) {
-                data.push(country);
-            });
-            
-            var countryLines = vis.selectAll("path.country-line").data(data, function(d) { return(d.code); });
-            defineBehavior(countryLines); // update()
-            defineBehavior(countryLines.enter().append("svg:path")); // enter()
-            countryLines.exit().remove();
-            
-            defineCountryNameBehavior(vis.selectAll("text.countryName"));
-            defineCountryNameBehavior(countryLines.enter().append("svg:text"));
-            
-            function defineCountryNameBehavior(selection) {
-                selection
-                    .attr("class", function(d) { return(d.active ? "countryName countryNameActive" : "countryName") })
-                    .text(function(d) { return d.name })
-                    .attr("x", function(d) { return x(endYear + 0.2) })
-                    .attr("y", function(d) { return y(d.dataPoints[d.dataPoints.length-1].perCent) })
-                    .attr("text-anchor", "left").attr("dy", 3);
-            }
-            
-            function defineBehavior(selection) { // since behavior is same for enter() and update(), pull it into a function
-                selection.attr("class", function(d) { return(d.regionCode + " country-line") })
-                         .classed("active", function(d) { return d.active })
-                         .attr("country", function(d) { return(d.code) })
-                         .attr("d", function(d) { return countryLine(d.dataPoints) })
-                         .style("visibility", function(d) { return(d.state) }) // if "highlighted", just interpreted as visible
-                         .classed('highlighted', function(d) { return(d.state == "highlighted" ? true : false) })
-                         .on("click", togglePermaActive)
-                         .on("mouseover", setActive)
-                         .on("mouseout", unsetActive);             
-            }
-            
-            function togglePermaActive(d) {
-                scope.$apply(function() { 
-                    countries[d.code].active = false;
-                    scope.$parent.togglePermaActive(d);
-                });
-            }
-            
-            function setActive(d) { 
-                if (d.activePersistent) { return; }
-                scope.$apply(function() { 
-                    scope.$parent.countries[d.code].active = true;
-                });
-            }
-            
-            function unsetActive(d) {
-                if (d.activePersistent) { return; }
-                scope.$apply(function() { 
-                    scope.$parent.countries[d.code].active = false;
-                });
-            }
-        }, true);
-        
-    }
-    return {
-        link: link,
-        restrict: 'A',
-        scope: true // inherit scope
-    }
-});
-
 app.directive("map", function() {
     function link(scope, element, attr) {
         d3.json("vendor/world-topo.json", function(error, world) {
@@ -327,7 +193,7 @@ app.directive("graph", function() {
 
 		var y,x,years,endYear, vis,line,countryLine;
 
-		svg = d3.select(element[0]).append("svg")
+		svgGraph = d3.select(element[0]).append("svg")
 			.attr("width", width + rightMargin).attr("height", height);
 
 		scope.$watch('limits', function(countries) {
@@ -339,8 +205,8 @@ app.directive("graph", function() {
 			y = d3.scale.linear().domain([endPercent, startPercent]).range([0 + margin, height - margin]);
 			x = d3.scale.linear().domain([startYear, endYear]).range([0 + margin - 5, width]);
 			years = d3.range(startYear, endYear+1);
-			svg.selectAll("*").remove();
-			vis = svg.append("svg:g");
+			svgGraph.selectAll("*").remove();
+			vis = svgGraph.append("svg:g");
 
 
 
@@ -378,6 +244,7 @@ app.directive("graph", function() {
 				.attr("x1", x(startYear - 0.1))
 				.attr("y2", y)
 				.attr("x2", x(startYear));
+
 		});
 
 		scope.$watch('countries', function(countries) {
@@ -389,10 +256,10 @@ app.directive("graph", function() {
 			var yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([100, 0]);
 			var xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, 20]);
 
-			svg.on( "mousedown", function() {
+			svgGraph.on( "mousedown", function() {
 				var p = d3.mouse( this);
 
-				svg.append( "rect")
+				svgGraph.append( "rect")
 					.attr({
 						rx      : 6,
 						ry      : 6,
@@ -404,7 +271,7 @@ app.directive("graph", function() {
 					})
 			})
 			.on( "mousemove", function() {
-				var s = svg.select( "rect.selection");
+				var s = svgGraph.select( "rect.selection");
 
 				if( !s.empty()) {
 					var p = d3.mouse( this),
@@ -439,7 +306,7 @@ app.directive("graph", function() {
 				}
 			})
 			.on( "mouseup", function() {
-				var s = svg.select("rect.selection");
+				var s = svgGraph.select("rect.selection");
 
 				if ( !s.empty()) {
 					scope.$apply(function() {
@@ -504,7 +371,7 @@ app.directive("graph", function() {
 						scope.$parent.countries = countries;
 					});
 				}
-				svg.selectAll("rect.selection").remove();
+				svgGraph.selectAll("rect.selection").remove();
 			});
 
 			var countryLines = vis.selectAll("path.country-line").data(data, function(d) { return(d.code); });

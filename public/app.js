@@ -36,12 +36,11 @@ app.controller('GraphController', function($scope, $http) {
                 
                 dataPoints = [];
                 for (j = 0; j < values.length; j++) {
-                    if (values[j] != '' && values[j] != '..') {
-                        dataPoints.push({
-                            yearIndex: j,
-                            perCent: values[j]
-                        });
-                    }
+                    var perCent = values[j] == '..' ? (j == 0 ? 0 : dataPoints[j-1].perCent) : values[j];
+                    dataPoints.push({
+                        yearIndex: j,
+                        perCent: perCent
+                    });
                 }
                 
                 var alpha2 = iso_3366_1_Alpha3_to_Alpha2[countryCode];
@@ -295,13 +294,13 @@ app.directive("map", function() {
         
         function getPercent(d) {
             var yearIndex = scope.year - scope.limits.startYear;
-            if (d.properties.dataPoints != null && d.properties.dataPoints.length > yearIndex) {
+            if (d.properties.dataPoints != null) {
                 return(d.properties.dataPoints[yearIndex].perCent);
             } else {
                 return(0);
             }
         }
-        
+
         function getColor(d) {
             var quantize = d3.scale.quantize()
                 .domain([0, 100])

@@ -220,15 +220,22 @@ app.directive("graph", function() {
 
 app.directive("map", function() {
     function link(scope, element, attr) {
-        var width, height, projection, path, graticule, svg, attributeArray = [], currentAttribute = 4, playing = false, countries;
-        setMap();
-        scope.$watch('countries', function(countries) {
-            loadData(countries); // let's load our data next
-
-        }, true);
+        d3.json("vendor/world-topo.json", function(error, world) {
+            var width, height, projection, path, graticule, svg, attributeArray = [], currentAttribute = 4, playing = false, countries;
+            
+            setMap();
+            scope.$watch('countries', function(countries) {
+                transferData(countries, world.objects.countries.geometries);
+                drawMap(world); // let's mug the map now with our newly populated data object
+            }, true);
+            
+            scope.$watch('year', function() {
+                drawMap(world);
+            }, true);
+            
+        });
         
-        
-        function setMap(countries) {
+        function setMap() {
             width = 960, height = 580; // map width and height, matches 
             projection = d3.geo.eckert5() // define our projection with parameters
                 .scale(170)
@@ -261,19 +268,13 @@ app.directive("map", function() {
                 .attr("d", path);
         }
         
-        function loadData(countries) {
-            console.log(countries);
-            d3.json("vendor/world-topo.json", function(error, world) {
-                var countriesGeo = world.objects.countries.geometries; // store the path in variable for ease
-                for (var i in countriesGeo) { // for each geometry object
-                    var id = countriesGeo[i].properties.id;
-                    for (var k in countries[id]) {
-                        countriesGeo[i].properties[k] = countries[id][k];
-                    }
-                    // console.log(countriesGeo[i].properties);
+        function transferData(countries, countriesGeo) {
+            for (var i in countriesGeo) { // for each geometry object
+                var id = countriesGeo[i].properties.id;
+                for (var k in countries[id]) {
+                    countriesGeo[i].properties[k] = countries[id][k];
                 }
-                drawMap(world); // let's mug the map now with our newly populated data object
-            });
+            }
         }
 
         function drawMap(world) {
@@ -288,23 +289,25 @@ app.directive("map", function() {
                 .attr("d", path); // create them using the svg path generator defined above
 
             d3.selectAll('.country') // select all the countries
-                .attr('data-percent', function(d) {
-                    var dataPoint = d.properties.dataPoints == null ? 0 : d.properties.dataPoints[10];
-                    return(dataPoint.perCent);
-                })
+                .attr('data-percent', getPercent)
                 .style('fill', getColor);
         }
-
+        
+        function getPercent(d) {
+            var yearIndex = scope.year - scope.limits.startYear;
+            if (d.properties.dataPoints != null && d.properties.dataPoints.length > yearIndex) {
+                return(d.properties.dataPoints[yearIndex].perCent);
+            } else {
+                return(0);
+            }
+        }
+        
         function getColor(d) {
-            var perCent = d.properties.dataPoints == null ? 0 : d.properties.dataPoints[d.properties.dataPoints.length-1].perCent;
-            console.log(d.properties.id, "perCent", perCent);
-            
             var quantize = d3.scale.quantize()
                 .domain([0, 100])
                 .range(["#c6d8ef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#085192", "#08306b"]);
-
         
-            return quantize(perCent); // return that number to the caller
+            return quantize(getPercent(d)); // return that number to the caller
         }
         
         function sequenceMap() {

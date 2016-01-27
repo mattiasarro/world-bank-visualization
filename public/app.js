@@ -1,6 +1,8 @@
 app = angular.module('app', []);
 
 app.controller('GraphController', function($scope, $http) {
+	console.log("controller");
+
         
         $scope.limits = {
             startYear: 1994,
@@ -94,7 +96,11 @@ app.directive("graph", function() {
 
 		var y,x,years,endYear, vis,line,countryLine;
 
+		svg = d3.select(element[0]).append("svg")
+			.attr("width", width + rightMargin).attr("height", height);
+
 		scope.$watch('limits', function(countries) {
+			console.log("watch limits");
 			var startYear = scope.limits.startYear;
 			endYear = scope.limits.endYear;
 			var startPercent = scope.limits.startPercent;
@@ -103,8 +109,7 @@ app.directive("graph", function() {
 			y = d3.scale.linear().domain([endPercent, startPercent]).range([0 + margin, height - margin]);
 			x = d3.scale.linear().domain([startYear, endYear]).range([0 + margin - 5, width]);
 			years = d3.range(startYear, endYear+1);
-			svg = d3.select(element[0]).append("svg")
-				.attr("width", width + rightMargin).attr("height", height);
+			svg.selectAll("*").remove();
 			vis = svg.append("svg:g");
 
 
@@ -143,6 +148,17 @@ app.directive("graph", function() {
 				.attr("x1", x(startYear - 0.1))
 				.attr("y2", y)
 				.attr("x2", x(startYear));
+
+
+		});
+
+		scope.$watch('countries', function(countries) {
+			console.log("watch countries");
+			var data = [];
+			angular.forEach(countries, function(country, countryCode) {
+				data.push(country);
+			});
+			console.log(data.length);
 
 			svg.on( "mousedown", function() {
 				var p = d3.mouse( this);
@@ -198,74 +214,99 @@ app.directive("graph", function() {
 				var s = svg.select("rect.selection");
 
 				if ( !s.empty()) {
-					d = {
-						x       : parseInt( s.attr( "x"), 10),
-						y       : parseInt( s.attr( "y"), 10),
-						width   : parseInt( s.attr( "width"), 10),
-						height  : parseInt( s.attr( "height"), 10)
-					};
+					scope.$apply(function() {
+						rect = {
+							x       : parseInt( s.attr( "x"), 10),
+							y       : parseInt( s.attr( "y"), 10),
+							width   : parseInt( s.attr( "width"), 10),
+							height  : parseInt( s.attr( "height"), 10)
+						};
 
+
+						data.forEach(function (d) {
+							country = scope.$parent.countries[d.code];
+							country.state = "hidden";
+							dataPoints = d.dataPoints;
+							dataPoints.forEach(function(p) {
+								xVal = x(years[p.yearIndex]);
+								yVal = y(p.perCent);
+
+								if (country && xVal >= rect.x && xVal <= (rect.x + rect.width)
+								 && yVal >= rect.y && yVal <= (rect.y + rect.height)) {
+									country.state = "visible";
+								}
+							});
+						});
+
+						yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([100, 0]);
+						xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, 20]);
+
+						scope.$parent.limits = {
+							startYear: years[Math.floor(xReversed(rect.x))],
+							endYear: years[Math.floor(xReversed(rect.x + rect.width))],
+							startPercent: Math.floor(yReversed(rect.y + rect.height)),
+							endPercent: Math.floor(yReversed(rect.y))
+							//startPercent: 0,
+							//endPercent: 100
+						}
+
+						console.log(scope.$parent.limits);
+					});
 				}
 				svg.selectAll("rect.selection").remove();
 			});
 
-		});
-
-		scope.$watch('countries', function(countries) {
-			var data = [];
-			angular.forEach(countries, function(country, countryCode) {
-				data.push(country);
-			});
-
 			var countryLines = vis.selectAll("path.country-line").data(data, function(d) { return(d.code); });
-			defineBehavior(countryLines); // update()
-		defineBehavior(countryLines.enter().append("svg:path")); // enter()
-		countryLines.exit().remove();
+			// update()
+			defineBehavior(countryLines); 
+			// enter()
+			defineBehavior(countryLines.enter().append("svg:path")); 
+			countryLines.exit().remove();
 
-		defineCountryNameBehavior(vis.selectAll("text.countryName"));
-		defineCountryNameBehavior(countryLines.enter().append("svg:text"));
+			defineCountryNameBehavior(vis.selectAll("text.countryName"));
+			defineCountryNameBehavior(countryLines.enter().append("svg:text"));
 
-		function defineCountryNameBehavior(selection) {
-			selection
-				.attr("class", function(d) { return(d.active ? "countryName countryNameActive" : "countryName") })
-				.text(function(d) { return d.name })
-				.attr("x", function(d) { return x(endYear + 0.2) })
-				.attr("y", function(d) { return y(d.dataPoints[d.dataPoints.length-1].perCent) })
-				.attr("text-anchor", "left").attr("dy", 3);
-		}
+			function defineCountryNameBehavior(selection) {
+				selection
+					.attr("class", function(d) { return(d.active ? "countryName countryNameActive" : "countryName") })
+					.text(function(d) { return d.name })
+					.attr("x", function(d) { return x(endYear + 0.2) })
+					.attr("y", function(d) { return y(d.dataPoints[d.dataPoints.length-1].perCent) })
+					.attr("text-anchor", "left").attr("dy", 3);
+			}
 
-		function defineBehavior(selection) { // since behavior is same for enter() and update(), pull it into a function
-			selection.attr("class", function(d) { return(d.regionCode + " country-line") })
-				.classed("active", function(d) { return d.active })
-				.attr("country", function(d) { return(d.code) })
-				.attr("d", function(d) { return countryLine(d.dataPoints) })
-				.style("visibility", function(d) { return(d.state) }) // if "highlighted", just interpreted as visible
-				.classed('highlighted', function(d) { return(d.state == "highlighted" ? true : false) })
-				.on("click", togglePermaActive)
-				.on("mouseover", setActive)
-				.on("mouseout", unsetActive);             
-		}
+			function defineBehavior(selection) { // since behavior is same for enter() and update(), pull it into a function
+				selection.attr("class", function(d) { return(d.regionCode + " country-line") })
+					.classed("active", function(d) { return d.active })
+					.attr("country", function(d) { return(d.code) })
+					.attr("d", function(d) { return countryLine(d.dataPoints) })
+					.style("visibility", function(d) { return(d.state) }) // if "highlighted", just interpreted as visible
+					.classed('highlighted', function(d) { return(d.state == "highlighted" ? true : false) })
+					.on("click", togglePermaActive)
+					.on("mouseover", setActive)
+					.on("mouseout", unsetActive);             
+			}
 
-		function togglePermaActive(d) {
-			scope.$apply(function() { 
-				scope.$parent.countries[d.code].active = false;
-				scope.$parent.togglePermaActive(d);
-			});
-		}
+			function togglePermaActive(d) {
+				scope.$apply(function() { 
+					scope.$parent.countries[d.code].active = false;
+					scope.$parent.togglePermaActive(d);
+				});
+			}
 
-		function setActive(d) { 
-			if (d.activePersistent) { return; }
-			scope.$apply(function() { 
-				scope.$parent.countries[d.code].active = true;
-			});
-		}
+			function setActive(d) { 
+				if (d.activePersistent) { return; }
+				scope.$apply(function() { 
+					scope.$parent.countries[d.code].active = true;
+				});
+			}
 
-		function unsetActive(d) {
-			if (d.activePersistent) { return; }
-			scope.$apply(function() { 
-				scope.$parent.countries[d.code].active = false;
-			});
-		}
+			function unsetActive(d) {
+				if (d.activePersistent) { return; }
+				scope.$apply(function() { 
+					scope.$parent.countries[d.code].active = false;
+				});
+			}
 
 		}, true);
 

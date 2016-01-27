@@ -70,6 +70,7 @@ app.controller('GraphController', function($scope, $http) {
             "hidden": "visible",
             "visible": "highlighted",
             "highlighted": "hidden"
+
         }
         var currentState = $scope.regions[regionCode]["state"];
         var newState = mapping[currentState];
@@ -330,7 +331,6 @@ app.directive("graph", function() {
 			.attr("width", width + rightMargin).attr("height", height);
 
 		scope.$watch('limits', function(countries) {
-			console.log("watch limits");
 			var startYear = scope.limits.startYear;
 			endYear = scope.limits.endYear;
 			var startPercent = scope.limits.startPercent;
@@ -386,7 +386,8 @@ app.directive("graph", function() {
 				data.push(country);
 			});
 
-			console.log(data.length);
+			var yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([100, 0]);
+			var xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, 20]);
 
 			svg.on( "mousedown", function() {
 				var p = d3.mouse( this);
@@ -435,7 +436,6 @@ app.directive("graph", function() {
 					}
 
 					s.attr( d);
-					//console.log( d);
 				}
 			})
 			.on( "mouseup", function() {
@@ -450,35 +450,58 @@ app.directive("graph", function() {
 							height  : parseInt( s.attr( "height"), 10)
 						};
 
+						if (rect.width < 20 || rect.height < 20) { return ; }
+
+						countries = {};
 
 						data.forEach(function (d) {
-							country = scope.$parent.countries[d.code];
-							country.state = "hidden";
-							dataPoints = d.dataPoints;
+							var country = scope.$parent.countries[d.code];
+							//country.state = "hidden";
+							var dataPoints = d.dataPoints;
+							var newDataPoints = [];
 							dataPoints.forEach(function(p) {
-								xVal = x(years[p.yearIndex]);
-								yVal = y(p.perCent);
+								yearLowerBound = years[Math.floor(xReversed(rect.x))];
+								yearUpperBound = years[Math.floor(xReversed(rect.x + rect.width))];
+								percentLowerBound = Math.floor(yReversed(rect.y + rect.height));
+								percentUpperBound = Math.floor(yReversed(rect.y));
+								xVal = years[p.yearIndex];
+								yVal = p.perCent;
 
-								if (country && xVal >= rect.x && xVal <= (rect.x + rect.width)
-								 && yVal >= rect.y && yVal <= (rect.y + rect.height)) {
-									country.state = "visible";
+								if (xVal >= yearLowerBound && xVal <= yearUpperBound
+										&& yVal >= percentLowerBound && yVal <= percentUpperBound) {
+									//country.state = "visible";
+									p.yearIndex = xVal - yearLowerBound;
+									newDataPoints.push(p);
 								}
 							});
+
+							countries[d.code] = country;
+							countries[d.code].dataPoints = newDataPoints;
+							//countries[d.code] = {
+							//	code: d.code,
+							//	codeAlpha2: country.codeAlpha2,
+							//	name: country.name,
+							//	regionCode: country.regionCode,
+							//	active: false,
+							//	state: "visible", // highlighted | hidden
+							//	dataPoints: newDataPoints
+							//};
 						});
 
-						yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([100, 0]);
-						xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, 20]);
 
 						scope.$parent.limits = {
-							startYear: years[Math.floor(xReversed(rect.x))],
-							endYear: years[Math.floor(xReversed(rect.x + rect.width))],
-							startPercent: Math.floor(yReversed(rect.y + rect.height)),
-							endPercent: Math.floor(yReversed(rect.y))
+							startYear: yearLowerBound,
+							endYear: yearUpperBound,
+							//startYear: 1994,
+							//endYear: 2014,
 							//startPercent: 0,
 							//endPercent: 100
+							startPercent: Math.floor(yReversed(rect.y + rect.height)),
+							endPercent: Math.floor(yReversed(rect.y))
 						}
 
-						console.log(scope.$parent.limits);
+						scope.$parent.countries = [];
+						scope.$parent.countries = countries;
 					});
 				}
 				svg.selectAll("rect.selection").remove();
@@ -542,6 +565,6 @@ app.directive("graph", function() {
 	return {
 		link: link,
 		restrict: 'A',
-		scope: { countries: '=', limits: '=' }
+		scope: true
 	}
 });

@@ -209,20 +209,15 @@ app.directive("graph", function() {
 
 app.directive("map", function() {
     function link(scope, element, attr) {
-        var format = function(d) {
-            d = d / 1000000;
-            return d3.format(',.02f')(d) + 'M';
-        }
-
         var map = d3.geomap.choropleth()
             .geofile('vendor/countries.json')
             .colors(colorbrewer.YlGnBu[9])
-            .column('YR2010')
-            .format(format)
+            .column('2014 [YR2014]')
+            .format(function(d) { return d3.round(d) + '%' })
             .legend(true)
             .unitId('Country Code');
 
-        d3.csv('sp.pop.totl.csv', function(error, data) {
+        d3.csv('internet-usage-countries.csv', function(error, data) {
             d3.select('#map')
                 .datum(data)
                 .call(map.draw, map);

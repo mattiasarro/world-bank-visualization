@@ -4,12 +4,17 @@
 <head>
     <title>Internet Usage</title>
     <script type="text/javascript" src="vendor/jquery-1.4.4.min.js"> </script>
-    <script type="text/javascript" src="vendor/d3.js?1.29.1"> </script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
+    <script src="http://d3js.org/queue.v1.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
     <script type="text/javascript" src="vendor/d3.time.js?1.29.1"> </script>
     <script type="text/javascript" src="vendor/d3.csv.js?1.29.1"> </script>
     <script type="text/javascript" src="vendor/angular.min.js?1.4.9"> </script>
     <script type="text/javascript" src="vendor/d3.geomap.dependencies.min.js#v=#v=1"></script>
     <script type="text/javascript" src="vendor/d3.geomap.min.js#v=#v=1"></script>
+    
+
     <script type="text/javascript" src="convert.js"> </script>
     <script type="text/javascript" src="app.js"> </script>
     <link href='http://fonts.googleapis.com/css?family=Bevan|Cardo' rel=' stylesheet' type=' text/css'>
@@ -46,6 +51,11 @@
          />
         <div map id="map">
             
+        </div>
+        <div class="">
+            
+            <button id="play">play</button>
+            <span id="clock">year</span>
         </div>
     </div>
 </div>

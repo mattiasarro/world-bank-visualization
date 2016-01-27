@@ -203,3 +203,7 @@ text {
 .legend-bar {
   stroke: #333;
   stroke-width: 1px; }
+#yearsSlider {
+    width: 900px;
+    margin-left: 25px;
+}

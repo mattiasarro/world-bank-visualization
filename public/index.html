@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html ng-app="app">
+<html ng-app="app" ng-init="year=2005">
 <head>
     <title>Internet Usage</title>
     <script type="text/javascript" src="vendor/jquery-1.4.4.min.js"> </script>
@@ -36,12 +36,14 @@
                   ng-click="togglePermaActive(country)"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>
             </ul>
         </div>
-        <div graph 
-             id="vis"
-             countries="countries" 
-             setCurrent="setCurrent" 
-             unsetCurrent="unsetCurrent" 
-             limits="limits"></div>
+        <div graph id="vis"></div>
+         <input id="yearsSlider" 
+             type="range" 
+             ng-model="year" 
+             min="{{limits.startYear}}" 
+             max="{{limits.endYear}}"
+             step="1"
+         />
         <div map id="map">
             
         </div>

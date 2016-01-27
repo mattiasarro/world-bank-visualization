@@ -1,13 +1,14 @@
 app = angular.module('app', []);
 
 app.controller('GraphController', function($scope, $http) {
-        
+
         $scope.limits = {
             startYear: 1994,
             endYear: 2014,
             startPercent: 0,
             endPercent: 100
         }
+        $scope.year = $scope.limits.startYear;
         
         $scope.regions = {
             "ECS": {name: "Europe and Central Asia", state: "visible"},
@@ -142,6 +143,18 @@ app.directive("graph", function() {
                                     .attr("x2", x(startYear));
         });
         
+        scope.$watch('year', function(year) {
+            var selectedPoints = [[ {x: scope.$parent.year, y: scope.limits.startPercent} , 
+                                    {x: scope.$parent.year, y: scope.limits.endPercent} ]];
+            var sel = vis.selectAll("path.year")
+                         .data(selectedPoints, function(d){ return 1 })
+                         .attr("d", line);
+            
+            sel.enter().append("svg:path")
+               .attr("d", line)
+               .attr("class", "axis year");
+        });
+        
         scope.$watch('countries', function(countries) {
             var data = [];
             angular.forEach(countries, function(country, countryCode) {
@@ -179,7 +192,7 @@ app.directive("graph", function() {
             
             function togglePermaActive(d) {
                 scope.$apply(function() { 
-                    scope.$parent.countries[d.code].active = false;
+                    countries[d.code].active = false;
                     scope.$parent.togglePermaActive(d);
                 });
             }
@@ -203,29 +216,33 @@ app.directive("graph", function() {
     return {
         link: link,
         restrict: 'A',
-        scope: { countries: '=', limits: '=' }
+        scope: true // inherit scope
     }
 });
 
 app.directive("map", function() {
     function link(scope, element, attr) {
-        var map = d3.geomap.choropleth()
+        scope.$watch('year', function(year) {
+
+            var map = d3.geomap.choropleth()
             .geofile('vendor/countries.json')
             .colors(colorbrewer.YlGnBu[9])
-            .column('2014 [YR2014]')
+            .column(year + ' [YR' + year + ']')
             .format(function(d) { return d3.round(d) + '%' })
             .legend(true)
             .unitId('Country Code');
-
-        d3.csv('internet-usage-countries.csv', function(error, data) {
-            d3.select('#map')
+            d3.select("#map svg").remove();
+            d3.csv('internet-usage-countries.csv', function(error, data) {
+                d3.select('#map')
                 .datum(data)
                 .call(map.draw, map);
+            });
+
         });
     }
     return {
         link: link,
         restrict: 'A',
-        scope: { }
+        scope: true
     }
 });

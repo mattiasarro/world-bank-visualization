@@ -295,7 +295,7 @@ app.directive("map", function() {
         function getPercent(d) {
             var yearIndex = scope.year - scope.limits.startYear;
             if (d.properties.dataPoints != null) {
-                return(d.properties.dataPoints[yearIndex].perCent);
+                    return(d.properties.dataPoints[yearIndex].perCent);
             } else {
                 return(0);
             }
@@ -309,42 +309,6 @@ app.directive("map", function() {
             return quantize(getPercent(d)); // return that number to the caller
         }
         
-        function sequenceMap() {
-            
-            var dataRange = getDataRange(); // get the min/max values from the current year's range of data values
-            d3.selectAll('.country').transition() //select all the countries and prepare for a transition to new values
-            .duration(750) // give it a smooth time period for the transition
-            .attr('fill-opacity', function(d) {
-                return getColor(d.properties[attributeArray[currentAttribute]], dataRange); // the end color value
-            })
-            
-        }
-        
-        function animateMap() {
-
-            var timer; // create timer object
-            d3.select('#play')
-                .on('click', function() { // when user clicks the play button
-                    if (playing == false) { // if the map is currently playing
-                        timer = setInterval(function() { // set a JS interval
-                            if (currentAttribute < attributeArray.length - 1) {
-                                currentAttribute += 1; // increment the current attribute counter
-                            } else {
-                                currentAttribute = 0; // or reset it to zero
-                            }
-                            sequenceMap(); // update the representation of the map 
-                            d3.select('#clock').html(attributeArray[currentAttribute]); // update the clock
-                        }, 2000);
-
-                        d3.select(this).html('stop'); // change the button label to stop
-                        playing = true; // change the status of the animation
-                    } else { // else if is currently playing
-                        clearInterval(timer); // stop the animation by clearing the interval
-                        d3.select(this).html('play'); // change the button label to play
-                        playing = false; // change the status again
-                    }
-                });
-        }
     }
     return {
         link: link,

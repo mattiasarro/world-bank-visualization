@@ -213,9 +213,13 @@ text {
     margin: -30px auto 0;
 }
 #map {
-    width: 960px;
+    width: 930px;
+    margin-left: 25px;
     height: 580px;
     position: relative;
+}
+#map svg {
+    border: 1px solid #ccc;
 }
 .stroke {
   fill: none;

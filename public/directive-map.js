@@ -16,16 +16,14 @@ angular.module('app').directive("map", function() {
         });
         
         function setMap() {
-            width = 960, height = 580; // map width and height, matches 
-            projection = d3.geo.eckert5() // define our projection with parameters
+            width = 900, height = 580; // map width and height, matches 
+            projection = d3.geo.mercator() // define our projection with parameters
                 .scale(170)
                 .translate([width / 2, height / 2])
                 .precision(.1);
 
             path = d3.geo.path() // create path generator function
                 .projection(projection); // add our define projection to it
-
-            graticule = d3.geo.graticule(); // create a graticule
 
             svg = d3.select("#map").append("svg") // append a svg to our html div to hold our map
                 .attr("width", width)
@@ -41,11 +39,6 @@ angular.module('app').directive("map", function() {
             svg.append("use") // use that svg to style with css
                 .attr("class", "stroke")
                 .attr("xlink:href", "#sphere");
-
-            svg.append("path") // use path generator to draw a graticule
-                .datum(graticule)
-                .attr("class", "graticule")
-                .attr("d", path);
         }
         
         function transferData(countries, countriesGeo) {

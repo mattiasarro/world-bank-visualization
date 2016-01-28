@@ -74,9 +74,14 @@ angular.module('app').directive("map", function() {
         }
         
         function getPercent(d) {
-            var yearIndex = scope.year - scope.limits.startYear;
-            if (d.properties.dataPoints != null) {
-                    return(d.properties.dataPoints[yearIndex].perCent);
+            var dataPoints = d.properties.dataPoints;
+            if (dataPoints != null) {
+                var dataPoint = dataPoints["year" + d.year];
+                if (dataPoint != null) {
+                    return(dataPoint.perCent);
+                } else {
+                    return(0)
+                }
             } else {
                 return(0);
             }

@@ -30,22 +30,34 @@ app.controller('GraphController', function($scope, $http) {
 
         $http.get('internet-usage-countries.csv').success(function(text) {
             var row = d3.csv.parseRows(text);
+            var years = d3.range($scope.limits.startYear, $scope.limits.endYear + 1);
             for (i = 1; i < row.length; i++) {
                 var values = row[i].slice(4, row[i.length - 1]);
                 var countryCode = row[i][3];
                 
-                dataPoints = [];
+                dataPoints = {};
                 for (j = 0; j < values.length; j++) {
-                    var perCent = values[j] == '..' ? (j == 0 ? 0 : dataPoints[j-1].perCent) : values[j];
-                    dataPoints.push({
-                        yearIndex: j,
-                        perCent: perCent
-                    });
-                }
+                    var perCent = values[j];
+                    var year = years[j];
+                    
+                    if (perCent == "..") {
+                        var lastYear = dataPoints["year" + String(year-1)];
+                        if (year == $scope.limits.startYear) {
+                            perCent = 0;
+                        } else {
+                            perCent = lastYear.perCent;
+                        }
+                    }
+                    dataPoints["year" + year] = {
+                        year: year,
+                        perCent: perCent,
+                        visible: true
+                    };
+                };
                 
                 var alpha2 = iso_3366_1_Alpha3_to_Alpha2[countryCode];
                 
-                if (alpha2 != undefined && dataPoints.length > 0) {
+                if (alpha2 != undefined && Object.keys(dataPoints).length > 0) {
                     $scope.countries[countryCode] = {
                         code: countryCode,
                         codeAlpha2: alpha2,

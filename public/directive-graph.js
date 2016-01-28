@@ -30,16 +30,18 @@ angular.module('app').directive("graph", function() {
             svgGraph.selectAll(".yLabel").remove();
             svgGraph.selectAll(".xTicks").remove();
             svgGraph.selectAll(".yTicks").remove();
+            svgGraph.selectAll(".xAxis").remove();
+            svgGraph.selectAll(".yAxis").remove();
 
             line = d3.svg.line().x(function(d) { return x(d.x) })
                                 .y(function(d) { return y(d.y) });
-            countryLine = d3.svg.line().x(function(d) { return x(years[d.yearIndex]) })
+            countryLine = d3.svg.line().x(function(d) { return x(d.year) })
                                        .y(function(d) { return y(d.perCent) });
 
             var xPoints = [[{x: startYear, y: startPercent}, {x: endYear, y: startPercent }]]; // not sure why array inside array necessary
             var yPoints = [[{x: startYear, y: startPercent}, {x: startYear, y: endPercent }]];
-            svgGraph.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis"); // x-axis
-            svgGraph.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis"); // y-axis
+            svgGraph.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis xAxis"); // x-axis
+            svgGraph.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis yAxis"); // y-axis
 
             svgGraph.selectAll(".xLabel").data(x.ticks(5))
                     .enter().append("svg:text")
@@ -89,7 +91,6 @@ angular.module('app').directive("graph", function() {
 
             if (!s.empty()) {
                 var p = d3.mouse(this),
-
                     d = {
                         x: parseInt(s.attr("x"), 10),
                         y: parseInt(s.attr("y"), 10),
@@ -137,34 +138,34 @@ angular.module('app').directive("graph", function() {
                 countries = {};
                 angular.forEach(scope.countries, function(country) {
                     var dataPoints = country.dataPoints;
-                    var newDataPoints = [];
-                    dataPoints.forEach(function(p) {
+                    // var newDataPoints = [];
+                    angular.forEach(dataPoints, function(p, yearStr) {
                         yearLowerBound = years[Math.floor(xReversed(rect.x))];
                         yearUpperBound = years[Math.floor(xReversed(rect.x + rect.width))];
                         percentLowerBound = Math.floor(yReversed(rect.y + rect.height));
                         percentUpperBound = Math.floor(yReversed(rect.y));
-                        xVal = years[p.yearIndex];
+                        xVal = p.year;
                         yVal = p.perCent;
 
-                        if (xVal >= yearLowerBound && xVal <= yearUpperBound && yVal >= percentLowerBound && yVal <= percentUpperBound) {
-                            p.yearIndex = xVal - yearLowerBound;
-                            newDataPoints.push(p);
+                        if (!(xVal >= yearLowerBound && xVal <= yearUpperBound && yVal >= percentLowerBound && yVal <= percentUpperBound)) {
+                            p.visible = false
                         }
                     });
 
                     countries[country.code] = country;
-                    countries[country.code].dataPoints = newDataPoints;
+                    countries[country.code].dataPoints = dataPoints;
                 });
                 
                 scope.$apply(function() {
-                    scope.$parent.limits = {
+                    scope.limits = {
                         startYear: yearLowerBound,
                         endYear: yearUpperBound,
                         startPercent: Math.floor(yReversed(rect.y + rect.height)),
                         endPercent: Math.floor(yReversed(rect.y))
                     }
-                    scope.$parent.countries = [];
-                    scope.$parent.countries = countries;
+                    scope.year = yearLowerBound;
+                    scope.countries = [];
+                    scope.countries = countries;
                 });
             }
             svgGraph.selectAll("rect.selection").remove();
@@ -194,11 +195,10 @@ angular.module('app').directive("graph", function() {
                     .text(function(d) { return d.name })
                     .attr("x", function(d) { return x(endYear + 0.2) })
                     .attr("y", function(d) { 
-                        console.log(d.dataPoints.length);
-                        if (d.dataPoints.length == 0) {
+                        if (Object.keys(d.dataPoints).length == 0) {
                             return 0;
                         } else {
-                            return y(d.dataPoints[d.dataPoints.length - 1].perCent) 
+                            return y(d.dataPoints["year" + scope.limits.endYear].perCent) 
                         }
                     })
                     .attr("text-anchor", "left").attr("dy", 3);
@@ -208,7 +208,15 @@ angular.module('app').directive("graph", function() {
                 selection.attr("class", function(d) { return (d.regionCode + " country-line") })
                     .classed("active", function(d) { return d.active })
                     .attr("country", function(d) { return (d.code) })
-                    .attr("d", function(d) { return countryLine(d.dataPoints) })
+                    .attr("d", function(d) { 
+                        var visiblePoints = [];
+                        angular.forEach(d.dataPoints, function(p, yearStr) {
+                            if (p.visible) {
+                                visiblePoints.push(p);
+                            }
+                        })
+                        return countryLine(visiblePoints) 
+                    })
                     .style("visibility", function(d) { return (d.state) }) // if "highlighted", just interpreted as visible
                     .classed('highlighted', function(d) { return (d.state == "highlighted" ? true : false) })
                     .on("click", togglePermaActive)

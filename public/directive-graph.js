@@ -244,22 +244,19 @@ angular.module('app').directive("graph", function() {
                 });
                 
                 scope.$apply(function() {
-                    scope.limits = {
+                    scope.$parent.limits = {
                         startYear: yearLowerBound,
                         endYear: yearUpperBound,
                         startPercent: Math.floor(yReversed(rect.y + rect.height)),
                         endPercent: Math.floor(yReversed(rect.y))
                     }
-                    scope.year = yearLowerBound;
-                    scope.countries = [];
-                    scope.countries = countries;
+                    scope.$parent.year = yearLowerBound;
+                    scope.$parent.countries = [];
+                    scope.$parent.countries = countries;
                 });
             }
             svgGraph.selectAll("rect.selection").remove();
         }
-        
-        
-
     }
     return {
         link: link,

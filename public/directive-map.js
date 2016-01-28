@@ -63,7 +63,34 @@ angular.module('app').directive("map", function() {
             d3.selectAll('.country') // select all the countries
                 .attr('data-percent', getPercent)
                 .style('stroke', getBorderColor)
-                .style('fill', getColor);
+                .style('fill', getColor)
+                .on("click", togglePermaActive)
+                .on("mouseover", setActive)
+                .on("mouseout", unsetActive);
+        }
+        
+        // these are duplicated from directive-graph but didn't manage to nicely refactor given the time constraints
+        function togglePermaActive(d) {
+            scope.$apply(function() {
+                scope.$parent.countries[d.properties.code].active = false;
+                scope.$parent.togglePermaActive(d.properties);
+            });
+        }
+
+        function setActive(d) {
+            var country = scope.$parent.countries[d.properties.code];
+            if (d.properties.activePersistent || country == undefined) { return; }
+            scope.$apply(function() {
+                scope.$parent.countries[d.properties.code].active = true;
+            });
+        }
+
+        function unsetActive(d) {
+            var country = scope.$parent.countries[d.properties.code];
+            if (d.properties.activePersistent || country == undefined) { return; }
+            scope.$apply(function() {
+                scope.$parent.countries[d.properties.code].active = false;
+            });
         }
         
         function getPercent(d) {

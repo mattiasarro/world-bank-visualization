@@ -81,11 +81,16 @@ angular.module('app').directive("map", function() {
         }
 
         function getColor(d) {
-            var quantize = d3.scale.quantize()
+            console.log();
+            if (d.properties.state == "hidden") {
+                return("#ededed")
+            } else {
+                var quantize = d3.scale.quantize()
                 .domain([0, 100])
                 .range(["#c6d8ef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#085192", "#08306b"]);
-        
-            return quantize(getPercent(d)); // return that number to the caller
+                
+                return quantize(getPercent(d)); // return that number to the caller
+            }
         }
         
     }

@@ -68,7 +68,94 @@ angular.module('app').directive("graph", function() {
                     .attr("y2", y)
                     .attr("x2", x(startYear));
         });
+        
+        scope.$watch('countries', function(countries) {
+            var data = [];
+            angular.forEach(countries, function(country, countryCode) {
+                data.push(country);
+            });
 
+            var countryLines = svgGraph.selectAll("path.country-line").data(data, function(d) {
+                return (d.code);
+            });
+            // update()
+            defineBehavior(countryLines);
+            // enter()
+            defineBehavior(countryLines.enter().append("svg:path"));
+            countryLines.exit().remove();
+
+            defineCountryNameBehavior(svgGraph.selectAll("text.countryName"));
+            defineCountryNameBehavior(countryLines.enter().append("svg:text"));
+            
+            function defineCountryNameBehavior(selection) {
+                selection
+                    .attr("class", function(d) { return (d.active ? "countryName countryNameActive" : "countryName") })
+                    .text(function(d) { return d.name })
+                    .attr("x", function(d) { return x(endYear + 0.2) })
+                    .attr("y", function(d) { 
+                        if (Object.keys(d.dataPoints).length == 0) {
+                            return 0;
+                        } else {
+                            return y(d.dataPoints["year" + scope.limits.endYear].perCent) 
+                        }
+                    })
+                    .attr("text-anchor", "left").attr("dy", 3);
+            }
+
+            function defineBehavior(selection) { // since behavior is same for enter() and update(), pull it into a function
+                selection.attr("class", function(d) { return (d.regionCode + " country-line") })
+                    .classed("active", function(d) { return d.active })
+                    .attr("country", function(d) { return (d.code) })
+                    .attr("d", function(d) { 
+                        var visiblePoints = [];
+                        angular.forEach(d.dataPoints, function(p, yearStr) {
+                            if (p.visible) {
+                                visiblePoints.push(p);
+                            }
+                        })
+                        return countryLine(visiblePoints) 
+                    })
+                    .style("visibility", function(d) { return (d.state) }) // if "highlighted", just interpreted as visible
+                    .classed('highlighted', function(d) { return (d.state == "highlighted" ? true : false) })
+                    .on("click", togglePermaActive)
+                    .on("mouseover", setActive)
+                    .on("mouseout", unsetActive);
+            }
+
+            function togglePermaActive(d) {
+                scope.$apply(function() {
+                    scope.$parent.countries[d.code].active = false;
+                    scope.$parent.togglePermaActive(d);
+                });
+            }
+
+            function setActive(d) {
+                if (d.activePersistent) { return; }
+                scope.$apply(function() {
+                    scope.$parent.countries[d.code].active = true;
+                });
+            }
+
+            function unsetActive(d) {
+                if (d.activePersistent) { return; }
+                scope.$apply(function() {
+                    scope.$parent.countries[d.code].active = false;
+                });
+            }
+
+        }, true);
+
+        scope.$watch('year', function(year) {
+            var selectedPoints = [[ {x: scope.$parent.year, y: scope.limits.startPercent} , 
+                                    {x: scope.$parent.year, y: scope.limits.endPercent} ]];
+            var sel = svgGraph.selectAll("path.year")
+                              .data(selectedPoints, function(d){ return 1 })
+                              .attr("d", line);
+            
+            sel.enter().append("svg:path")
+               .attr("d", line)
+               .attr("class", "axis year");
+        });
 
         
         function startDragging() {
@@ -171,81 +258,7 @@ angular.module('app').directive("graph", function() {
             svgGraph.selectAll("rect.selection").remove();
         }
         
-        scope.$watch('countries', function(countries) {
-            var data = [];
-            angular.forEach(countries, function(country, countryCode) {
-                data.push(country);
-            });
-
-            var countryLines = svgGraph.selectAll("path.country-line").data(data, function(d) {
-                return (d.code);
-            });
-            // update()
-            defineBehavior(countryLines);
-            // enter()
-            defineBehavior(countryLines.enter().append("svg:path"));
-            countryLines.exit().remove();
-
-            defineCountryNameBehavior(svgGraph.selectAll("text.countryName"));
-            defineCountryNameBehavior(countryLines.enter().append("svg:text"));
-            
-            function defineCountryNameBehavior(selection) {
-                selection
-                    .attr("class", function(d) { return (d.active ? "countryName countryNameActive" : "countryName") })
-                    .text(function(d) { return d.name })
-                    .attr("x", function(d) { return x(endYear + 0.2) })
-                    .attr("y", function(d) { 
-                        if (Object.keys(d.dataPoints).length == 0) {
-                            return 0;
-                        } else {
-                            return y(d.dataPoints["year" + scope.limits.endYear].perCent) 
-                        }
-                    })
-                    .attr("text-anchor", "left").attr("dy", 3);
-            }
-
-            function defineBehavior(selection) { // since behavior is same for enter() and update(), pull it into a function
-                selection.attr("class", function(d) { return (d.regionCode + " country-line") })
-                    .classed("active", function(d) { return d.active })
-                    .attr("country", function(d) { return (d.code) })
-                    .attr("d", function(d) { 
-                        var visiblePoints = [];
-                        angular.forEach(d.dataPoints, function(p, yearStr) {
-                            if (p.visible) {
-                                visiblePoints.push(p);
-                            }
-                        })
-                        return countryLine(visiblePoints) 
-                    })
-                    .style("visibility", function(d) { return (d.state) }) // if "highlighted", just interpreted as visible
-                    .classed('highlighted', function(d) { return (d.state == "highlighted" ? true : false) })
-                    .on("click", togglePermaActive)
-                    .on("mouseover", setActive)
-                    .on("mouseout", unsetActive);
-            }
-
-            function togglePermaActive(d) {
-                scope.$apply(function() {
-                    scope.$parent.countries[d.code].active = false;
-                    scope.$parent.togglePermaActive(d);
-                });
-            }
-
-            function setActive(d) {
-                if (d.activePersistent) { return; }
-                scope.$apply(function() {
-                    scope.$parent.countries[d.code].active = true;
-                });
-            }
-
-            function unsetActive(d) {
-                if (d.activePersistent) { return; }
-                scope.$apply(function() {
-                    scope.$parent.countries[d.code].active = false;
-                });
-            }
-
-        }, true);
+        
 
     }
     return {

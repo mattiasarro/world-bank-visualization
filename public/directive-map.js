@@ -76,7 +76,7 @@ angular.module('app').directive("map", function() {
         function getPercent(d) {
             var dataPoints = d.properties.dataPoints;
             if (dataPoints != null) {
-                var dataPoint = dataPoints["year" + d.year];
+                var dataPoint = dataPoints["year" + scope.year];
                 if (dataPoint != null) {
                     return(dataPoint.perCent);
                 } else {

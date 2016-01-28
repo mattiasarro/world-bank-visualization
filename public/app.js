@@ -179,7 +179,23 @@ app.directive("graph", function() {
             var yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([100, 0]);
             var xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, 20]);
 
-            svgGraph.on("mousedown", function() {
+            svgGraph.on("mousedown", startDragging)
+                .on("mousemove", drag)
+                .on("mouseup", stopDragging);
+
+            var countryLines = vis.selectAll("path.country-line").data(data, function(d) {
+                return (d.code);
+            });
+            // update()
+            defineBehavior(countryLines);
+            // enter()
+            defineBehavior(countryLines.enter().append("svg:path"));
+            countryLines.exit().remove();
+
+            defineCountryNameBehavior(vis.selectAll("text.countryName"));
+            defineCountryNameBehavior(countryLines.enter().append("svg:text"));
+            
+            function startDragging() {
                     var p = d3.mouse(this);
 
                     svgGraph.append("rect")
@@ -192,8 +208,9 @@ app.directive("graph", function() {
                             width: 0,
                             height: 0
                         })
-                })
-                .on("mousemove", function() {
+                }
+            
+            function drag() {
                     var s = svgGraph.select("rect.selection");
 
                     if (!s.empty()) {
@@ -226,89 +243,78 @@ app.directive("graph", function() {
 
                         s.attr(d);
                     }
-                })
-                .on("mouseup", function() {
-                    var s = svgGraph.select("rect.selection");
+                }
+            
+            function stopDragging() {
+                var s = svgGraph.select("rect.selection");
 
-                    if (!s.empty()) {
-                        scope.$apply(function() {
-                            rect = {
-                                x: parseInt(s.attr("x"), 10),
-                                y: parseInt(s.attr("y"), 10),
-                                width: parseInt(s.attr("width"), 10),
-                                height: parseInt(s.attr("height"), 10)
-                            };
+                if (!s.empty()) {
+                    scope.$apply(function() {
+                        rect = {
+                            x: parseInt(s.attr("x"), 10),
+                            y: parseInt(s.attr("y"), 10),
+                            width: parseInt(s.attr("width"), 10),
+                            height: parseInt(s.attr("height"), 10)
+                        };
 
-                            if (rect.width < 20 || rect.height < 20) {
-                                return;
-                            }
+                        if (rect.width < 20 || rect.height < 20) {
+                            return;
+                        }
 
-                            countries = {};
+                        countries = {};
 
-                            data.forEach(function(d) {
-                                var country = scope.$parent.countries[d.code];
-                                //country.state = "hidden";
-                                var dataPoints = d.dataPoints;
-                                var newDataPoints = [];
-                                dataPoints.forEach(function(p) {
-                                    yearLowerBound = years[Math.floor(xReversed(rect.x))];
-                                    yearUpperBound = years[Math.floor(xReversed(rect.x + rect.width))];
-                                    percentLowerBound = Math.floor(yReversed(rect.y + rect.height));
-                                    percentUpperBound = Math.floor(yReversed(rect.y));
-                                    xVal = years[p.yearIndex];
-                                    yVal = p.perCent;
+                        data.forEach(function(d) {
+                            var country = scope.$parent.countries[d.code];
+                            //country.state = "hidden";
+                            var dataPoints = d.dataPoints;
+                            var newDataPoints = [];
+                            dataPoints.forEach(function(p) {
+                                yearLowerBound = years[Math.floor(xReversed(rect.x))];
+                                yearUpperBound = years[Math.floor(xReversed(rect.x + rect.width))];
+                                percentLowerBound = Math.floor(yReversed(rect.y + rect.height));
+                                percentUpperBound = Math.floor(yReversed(rect.y));
+                                xVal = years[p.yearIndex];
+                                yVal = p.perCent;
 
-                                    if (xVal >= yearLowerBound && xVal <= yearUpperBound && yVal >= percentLowerBound && yVal <= percentUpperBound) {
-                                        //country.state = "visible";
-                                        p.yearIndex = xVal - yearLowerBound;
-                                        newDataPoints.push(p);
-                                    }
-                                });
-
-                                countries[d.code] = country;
-                                countries[d.code].dataPoints = newDataPoints;
-                                //countries[d.code] = {
-                                //	code: d.code,
-                                //	codeAlpha2: country.codeAlpha2,
-                                //	name: country.name,
-                                //	regionCode: country.regionCode,
-                                //	active: false,
-                                //	state: "visible", // highlighted | hidden
-                                //	dataPoints: newDataPoints
-                                //};
+                                if (xVal >= yearLowerBound && xVal <= yearUpperBound && yVal >= percentLowerBound && yVal <= percentUpperBound) {
+                                    //country.state = "visible";
+                                    p.yearIndex = xVal - yearLowerBound;
+                                    newDataPoints.push(p);
+                                }
                             });
 
-
-                            scope.$parent.limits = {
-                                startYear: yearLowerBound,
-                                endYear: yearUpperBound,
-                                //startYear: 1994,
-                                //endYear: 2014,
-                                //startPercent: 0,
-                                //endPercent: 100
-                                startPercent: Math.floor(yReversed(rect.y + rect.height)),
-                                endPercent: Math.floor(yReversed(rect.y))
-                            }
-
-                            scope.$parent.countries = [];
-                            scope.$parent.countries = countries;
+                            countries[d.code] = country;
+                            countries[d.code].dataPoints = newDataPoints;
+                            //countries[d.code] = {
+                            //	code: d.code,
+                            //	codeAlpha2: country.codeAlpha2,
+                            //	name: country.name,
+                            //	regionCode: country.regionCode,
+                            //	active: false,
+                            //	state: "visible", // highlighted | hidden
+                            //	dataPoints: newDataPoints
+                            //};
                         });
-                    }
-                    svgGraph.selectAll("rect.selection").remove();
-                });
 
-            var countryLines = vis.selectAll("path.country-line").data(data, function(d) {
-                return (d.code);
-            });
-            // update()
-            defineBehavior(countryLines);
-            // enter()
-            defineBehavior(countryLines.enter().append("svg:path"));
-            countryLines.exit().remove();
 
-            defineCountryNameBehavior(vis.selectAll("text.countryName"));
-            defineCountryNameBehavior(countryLines.enter().append("svg:text"));
+                        scope.$parent.limits = {
+                            startYear: yearLowerBound,
+                            endYear: yearUpperBound,
+                            //startYear: 1994,
+                            //endYear: 2014,
+                            //startPercent: 0,
+                            //endPercent: 100
+                            startPercent: Math.floor(yReversed(rect.y + rect.height)),
+                            endPercent: Math.floor(yReversed(rect.y))
+                        }
 
+                        scope.$parent.countries = [];
+                        scope.$parent.countries = countries;
+                    });
+                }
+                svgGraph.selectAll("rect.selection").remove();
+            }
+            
             function defineCountryNameBehavior(selection) {
                 selection
                     .attr("class", function(d) {

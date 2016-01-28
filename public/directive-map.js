@@ -51,7 +51,6 @@ angular.module('app').directive("map", function() {
         }
 
         function drawMap(world) {
-
             svg.selectAll(".country") // select country objects (which don't exist yet)
                 .data(topojson.feature(world, world.objects.countries).features) // bind data to these non-existent objects
                 .enter().append("path") // prepare data to be appended to paths
@@ -63,6 +62,7 @@ angular.module('app').directive("map", function() {
 
             d3.selectAll('.country') // select all the countries
                 .attr('data-percent', getPercent)
+                .style('stroke', getBorderColor)
                 .style('fill', getColor);
         }
         
@@ -79,9 +79,28 @@ angular.module('app').directive("map", function() {
                 return(0);
             }
         }
-
+        
+        var highlights = {
+            "SAS": "#895881",
+            "ECS": "#ED7C31",
+            "MEA": "#effa75",
+            "SSF": "#6E9E75",
+            "LCN": "#00BBD6",
+            "EAS": "#e25f82",
+            "NAC": "#be1932"
+        };
+        
+        function getBorderColor(d) {
+            if (d.properties.active) {
+                return "#000000";
+            } else if (d.properties.state == "highlighted") {
+                return highlights[d.properties.regionCode];
+            } else {
+                return "#FFFFFF";
+            }
+        }
+        
         function getColor(d) {
-            console.log();
             if (d.properties.state == "hidden") {
                 return("#ededed")
             } else {

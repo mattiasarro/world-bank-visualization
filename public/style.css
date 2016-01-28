@@ -59,7 +59,7 @@ a {
   color: #fff;
 }
 #filters a.MEA-highlighted {
-  background: #82A5C0;
+  background: #c9da3b;
   color: #fff;
 }
 #filters a.SSF-highlighted {
@@ -124,10 +124,10 @@ path.active, path.highlighted.active {
     border: 2px solid #ED7C31;
 }
 .MEA.highlighted {
-  stroke: #82A5C0;
+  stroke: #c9da3b;
 }
 .flag-highlighted-MEA {
-    border: 2px solid #82A5C0;
+    border: 2px solid #c9da3b;
 }
 .SSF.highlighted {
   stroke: #6E9E75;

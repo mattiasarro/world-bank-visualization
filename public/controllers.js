@@ -86,7 +86,7 @@ app.controller('GraphController', function($scope, $http) {
 	}
 
 	function getDataDerivative(dataPoints) {
-	    derivatives = {};
+	    var derivatives = {};
 	    angular.copy(dataPoints, derivatives);
 	    var key = "perCent";
 	    var len = Object.keys(dataPoints).length;

@@ -78,11 +78,7 @@ angular.module('app').directive("graph", function() {
 
         scope.$watch('countries', function(countries) {
             if (scope.mode != "countries") { return; }
-
-            var data = [];
-            angular.forEach(countries, function(country, countryCode) {
-                data.push(country);
-            });
+	    var data = _.toArray(countries);
 
             var countryLines = svgGraph.selectAll("path.country-line").data(data, function(d) {
                 return (d.code);

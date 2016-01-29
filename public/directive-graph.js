@@ -102,10 +102,11 @@ angular.module('app').directive("graph", function() {
                     .text(function(d) { return d.name })
                     .attr("x", function(d) { return x(endYear + 0.2) })
                     .attr("y", function(d) { 
-                        if (Object.keys(d.dataPoints).length == 0) {
+			var dataPoints = scope.graphType == 'index' ? d.dataPointsGrowthRates : d.dataPoints;
+                        if (Object.keys(dataPoints).length == 0) {
                             return 0;
                         } else {
-                            return y(d.dataPoints["year" + scope.limits.endYear].perCent) 
+                            return y(dataPoints["year" + scope.limits.endYear].perCent) 
                         }
                     })
                     .attr("text-anchor", "left").attr("dy", 3);
@@ -116,8 +117,9 @@ angular.module('app').directive("graph", function() {
                     .classed("active", function(d) { return d.active })
                     .attr("country", function(d) { return (d.code) })
                     .attr("d", function(d) { 
+			var dataPoints = scope.graphType == 'index' ? d.dataPointsGrowthRates : d.dataPoints;
                         var visiblePoints = [];
-                        angular.forEach(d.dataPoints, function(p, yearStr) {
+                        angular.forEach(dataPoints, function(p, yearStr) {
                             if (p.visible) { visiblePoints.push(p) }
                         })
                         return countryLine(visiblePoints) 
@@ -232,9 +234,9 @@ angular.module('app').directive("graph", function() {
                 }
 
                 countries = {};
-                angular.forEach(scope.countries, function(country) {
-                    var dataPoints = country.dataPoints;
-                    // var newDataPoints = [];
+		angular.forEach(scope.countries, function(country) {
+		    var dataPoints = scope.graphType == 'index' ? country.dataPointsGrowthRates : country.dataPoints;
+
                     angular.forEach(dataPoints, function(p, yearStr) {
                         yearLowerBound = years[Math.floor(xReversed(rect.x))];
                         yearUpperBound = years[Math.floor(xReversed(rect.x + rect.width))];
@@ -249,7 +251,12 @@ angular.module('app').directive("graph", function() {
                     });
 
                     countries[country.code] = country;
-                    countries[country.code].dataPoints = dataPoints;
+		    if (scope.graphType == 'index') {
+			countries[country.code].dataPointsGrowthRates = dataPoints;
+		    } else {
+			countries[country.code].dataPoints = dataPoints;
+		    }
+
                 });
                 
                 scope.$apply(function() {

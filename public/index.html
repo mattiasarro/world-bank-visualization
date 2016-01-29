@@ -26,7 +26,16 @@
 <body>
 <div id="main-wrapper">
     <div id="content" ng-controller="GraphController">
-        <h1>Internet Usage </h1>
+        <h1>
+            Internet Usage 
+            <span class="buttons">
+                <button type="button" class="btn {{btnActive('countries')}}" ng-click="setMode('countries')">Countries (lines)</button>
+                <button type="button" class="btn {{btnActive('regions')}}" ng-click="setMode('regions')">Regions (stack)</button>
+            </span>
+        </h1>
+        <div class="row">
+            
+        </div>
         <div id="filters">
             <a ng-repeat="(id, region) in regions" 
                id="{{id}}" 

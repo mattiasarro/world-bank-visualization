@@ -1,6 +1,7 @@
 app = angular.module('app', []);
 
 app.controller('GraphController', function($scope, $http) {
+    $scope.mode = 'countries';
     $scope.limits = {
         startYear: 1994,
         endYear: 2014,
@@ -20,6 +21,7 @@ app.controller('GraphController', function($scope, $http) {
     };
 
     $scope.countries = {};
+    var years = d3.range($scope.limits.startYear, $scope.limits.endYear + 1);
     
     $http.get('country-regions.csv').success(function(text) {
         var countriesRegions = {};
@@ -29,39 +31,17 @@ app.controller('GraphController', function($scope, $http) {
         }
 
         $http.get('internet-usage-countries.csv').success(function(text) {
-            var row = d3.csv.parseRows(text);
-            var years = d3.range($scope.limits.startYear, $scope.limits.endYear + 1);
-            for (i = 1; i < row.length; i++) {
-                var values = row[i].slice(4, row[i.length - 1]);
-                var countryCode = row[i][3];
-                
-                dataPoints = {};
-                for (j = 0; j < values.length; j++) {
-                    var perCent = values[j];
-                    var year = years[j];
-                    
-                    if (perCent == "..") {
-                        var lastYear = dataPoints["year" + String(year-1)];
-                        if (year == $scope.limits.startYear) {
-                            perCent = 0;
-                        } else {
-                            perCent = lastYear.perCent;
-                        }
-                    }
-                    dataPoints["year" + year] = {
-                        year: year,
-                        perCent: perCent,
-                        visible: true
-                    };
-                };
-                
+            var rows = d3.csv.parseRows(text);
+            for (i = 1; i < rows.length; i++) {
+                var countryCode = rows[i][3];                
+                var dataPoints = extractData({}, rows[i]);
                 var alpha2 = iso_3366_1_Alpha3_to_Alpha2[countryCode];
                 
                 if (alpha2 != undefined && Object.keys(dataPoints).length > 0) {
                     $scope.countries[countryCode] = {
                         code: countryCode,
                         codeAlpha2: alpha2,
-                        name: row[i][2],
+                        name: rows[i][2],
                         regionCode: countriesRegions[countryCode], // ECS | NAN, etc
                         active: false,
                         state: "visible", // highlighted | hidden
@@ -70,8 +50,58 @@ app.controller('GraphController', function($scope, $http) {
                 }
             }
         });
+        
+        function extractData(dataPoints, row) {
+            var values = row.slice(4, row.length);
+            var code = row[3];
+            for (j = 0; j < values.length; j++) {
+                var value = values[j];
+                var year = years[j];
+                if (row[0] == "Internet users (per 100 people)") {
+                    key = "perCent"
+                } else if (row[0] == "Population, total") {
+                    key = "population";
+                }
+                if (value == "..") {
+                    var lastYear = dataPoints["year" + String(year-1)];
+                    if (year == $scope.limits.startYear) {
+                        value = 0;
+                    } else {
+                        value = lastYear[key];
+                    }
+                }
+                if (dataPoints["year" + year] == undefined) {
+                    dataPoints["year" + year] = {
+                        year: year,
+                        visible: true
+                    };
+                }
+                dataPoints["year" + year][key] = value;
+            };
+            return dataPoints;
+        }
+
+        $http.get('internet-usage-regions.csv').success(function(text) {
+            var rows = d3.csv.parseRows(text);
+            for (i = 1; i < rows.length; i++) {
+                var regionCode = rows[i][3];
+                var region = $scope.regions[regionCode];
+                var dataPoints = region.dataPoints == undefined ? {} : region.dataPoints;
+                $scope.regions[regionCode].dataPoints = extractData(dataPoints, rows[i]);
+            }
+        });
     });
 
+    
+    $scope.btnActive = function(mode) {
+        // console.log($scope.mode, mode);
+        return($scope.mode == mode ? "btn-active" : "");
+    }
+    
+    $scope.setMode = function(mode) {
+        $scope.mode = mode;
+    }
+    
     $scope.togglePermaActive = function(country) {
         $scope.countries[country.code].active = !$scope.countries[country.code].active;
         $scope.countries[country.code].activePersistent = !$scope.countries[country.code].activePersistent;

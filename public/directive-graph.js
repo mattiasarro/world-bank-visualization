@@ -69,7 +69,14 @@ angular.module('app').directive("graph", function() {
                     .attr("x2", x(startYear));
         });
         
+
+        
+        scope.$watch('mode', function(countries) {
+            svgGraph.selectAll("path.country-line").remove();
+        }, true);
+
         scope.$watch('countries', function(countries) {
+            if (scope.mode != "countries") { return; }
             var data = [];
             angular.forEach(countries, function(country, countryCode) {
                 data.push(country);

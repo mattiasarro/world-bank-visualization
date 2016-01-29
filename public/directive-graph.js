@@ -1,7 +1,7 @@
 angular.module('app').directive("graph", function() {
     function link(scope, element, attr) {
-		//Need this boolean to totally disable the frame after mouse up
-		dragging = false;
+        //Need this boolean to totally disable the frame after mouse up
+        dragging = false;
 
         var width = 925;
         var height = 550;
@@ -44,8 +44,8 @@ angular.module('app').directive("graph", function() {
             svgGraph.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis xAxis"); // x-axis
             svgGraph.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis yAxis"); // y-axis
 
-			//define the tick to avoid the floating point years
-			var xTicks = years.length >= 5 ? 5 : years.length - 1;
+            //define the tick to avoid the floating point years
+            var xTicks = years.length >= 5 ? 5 : years.length - 1;
             svgGraph.selectAll(".xLabel").data(x.ticks(xTicks))
                     .enter().append("svg:text")
                     .attr("class", "xLabel")
@@ -80,9 +80,9 @@ angular.module('app').directive("graph", function() {
 
         scope.$watch('countries', function(countries) {
             if (scope.mode != "countries") { return; }
-			//these 2 functions need to be updated when the new ranges are set
-			yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([scope.$parent.limits.endPercent, scope.$parent.limits.startPercent]);
-			xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, scope.$parent.limits.endYear - scope.$parent.limits.startYear]);
+            //these 2 functions need to be updated when the new ranges are set
+            yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([scope.$parent.limits.endPercent, scope.$parent.limits.startPercent]);
+            xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, scope.$parent.limits.endYear - scope.$parent.limits.startYear]);
 
             var data = [];
             angular.forEach(countries, function(country, countryCode) {
@@ -173,7 +173,7 @@ angular.module('app').directive("graph", function() {
 
         
         function startDragging() {
-			dragging = true;
+            dragging = true;
             var p = d3.mouse(this);
 
             svgGraph.append("rect")
@@ -189,7 +189,7 @@ angular.module('app').directive("graph", function() {
         }
         
         function drag() {
-			if (!dragging) { return; }
+            if (!dragging) { return; }
             var s = svgGraph.select("rect.selection");
 
             if (!s.empty()) {
@@ -224,7 +224,7 @@ angular.module('app').directive("graph", function() {
         }
         
         function stopDragging() {
-			dragging = false;
+            dragging = false;
             var s = svgGraph.select("rect.selection");
 
             if (!s.empty()) {

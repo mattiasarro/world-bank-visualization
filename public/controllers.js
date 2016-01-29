@@ -94,7 +94,6 @@ app.controller('GraphController', function($scope, $http) {
 
     
     $scope.btnActive = function(mode) {
-        // console.log($scope.mode, mode);
         return($scope.mode == mode ? "btn-active" : "");
     }
     

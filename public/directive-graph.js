@@ -1,14 +1,13 @@
 angular.module('app').directive("graph", function() {
     function link(scope, element, attr) {
-        //Need this boolean to totally disable the frame after mouse up
-        dragging = false;
 
         var width = 925;
         var height = 550;
         var margin = 30;
         var rightMargin = 150;
         
-        var y, x, years, endYear, svgGraph, line, countryLine;
+        var y, x, years, endYear, svgGraph, line, countryLine, xReversed, yReversed;
+        var dragging = false; // disable the frame after mouse up
         
         svgGraph = d3.select(element[0]).append("svg")
                      .attr("width", width + rightMargin)
@@ -24,6 +23,8 @@ angular.module('app').directive("graph", function() {
             var startPercent = scope.limits.startPercent;
             var endPercent = scope.limits.endPercent;
             
+            yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([endPercent, startPercent]);
+            xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, endYear - startYear]);
             y = d3.scale.linear().domain([endPercent, startPercent]).range([0 + margin, height - margin]);
             x = d3.scale.linear().domain([startYear, endYear]).range([0 + margin - 5, width]);
             years = d3.range(startYear, endYear + 1);
@@ -44,8 +45,7 @@ angular.module('app').directive("graph", function() {
             svgGraph.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis xAxis"); // x-axis
             svgGraph.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis yAxis"); // y-axis
 
-            //define the tick to avoid the floating point years
-            var xTicks = years.length >= 5 ? 5 : years.length - 1;
+            var xTicks = years.length >= 5 ? 5 : years.length - 1; // avoid the floating point years
             svgGraph.selectAll(".xLabel").data(x.ticks(xTicks))
                     .enter().append("svg:text")
                     .attr("class", "xLabel")
@@ -71,18 +71,13 @@ angular.module('app').directive("graph", function() {
                     .attr("y2", y)
                     .attr("x2", x(startYear));
         });
-        
 
-        
         scope.$watch('mode', function(countries) {
             svgGraph.selectAll("path.country-line").remove();
         }, true);
 
         scope.$watch('countries', function(countries) {
             if (scope.mode != "countries") { return; }
-            //these 2 functions need to be updated when the new ranges are set
-            yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([scope.$parent.limits.endPercent, scope.$parent.limits.startPercent]);
-            xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, scope.$parent.limits.endYear - scope.$parent.limits.startYear]);
 
             var data = [];
             angular.forEach(countries, function(country, countryCode) {
@@ -123,9 +118,7 @@ angular.module('app').directive("graph", function() {
                     .attr("d", function(d) { 
                         var visiblePoints = [];
                         angular.forEach(d.dataPoints, function(p, yearStr) {
-                            if (p.visible) {
-                                visiblePoints.push(p);
-                            }
+                            if (p.visible) { visiblePoints.push(p) }
                         })
                         return countryLine(visiblePoints) 
                     })
@@ -171,7 +164,6 @@ angular.module('app').directive("graph", function() {
                .attr("class", "axis year");
         });
 
-        
         function startDragging() {
             dragging = true;
             var p = d3.mouse(this);

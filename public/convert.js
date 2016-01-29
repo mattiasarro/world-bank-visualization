@@ -246,6 +246,7 @@ iso_3366_1_Alpha3_to_Alpha2 = {
     "WLF": "WF",
     "ESH": "EH",
     "YEM": "YE",
+    "ZAR": "CD",
     "ZMB": "ZM",
     "ZWE": "ZW"
 }

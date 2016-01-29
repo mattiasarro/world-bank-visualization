@@ -1,13 +1,14 @@
 angular.module('app').directive("graph", function() {
     function link(scope, element, attr) {
+		//Need this boolean to totally disable the frame after mouse up
+		dragging = false;
+
         var width = 925;
         var height = 550;
         var margin = 30;
         var rightMargin = 150;
         
         var y, x, years, endYear, svgGraph, line, countryLine;
-        var yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([100, 0]);
-        var xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, 20]);
         
         svgGraph = d3.select(element[0]).append("svg")
                      .attr("width", width + rightMargin)
@@ -70,6 +71,10 @@ angular.module('app').directive("graph", function() {
         });
         
         scope.$watch('countries', function(countries) {
+			//these 2 functions need to be updated when the new ranges are set
+			yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([scope.$parent.limits.endPercent, scope.$parent.limits.startPercent]);
+			xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, scope.$parent.limits.endYear - scope.$parent.limits.startYear]);
+
             var data = [];
             angular.forEach(countries, function(country, countryCode) {
                 data.push(country);
@@ -159,6 +164,7 @@ angular.module('app').directive("graph", function() {
 
         
         function startDragging() {
+			dragging = true;
             var p = d3.mouse(this);
 
             svgGraph.append("rect")
@@ -174,6 +180,7 @@ angular.module('app').directive("graph", function() {
         }
         
         function drag() {
+			if (!dragging) { return; }
             var s = svgGraph.select("rect.selection");
 
             if (!s.empty()) {
@@ -208,6 +215,7 @@ angular.module('app').directive("graph", function() {
         }
         
         function stopDragging() {
+			dragging = false;
             var s = svgGraph.select("rect.selection");
 
             if (!s.empty()) {

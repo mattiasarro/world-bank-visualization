@@ -6,7 +6,7 @@ angular.module('app').directive("graph", function() {
         var margin = 30;
         var rightMargin = 150;
         
-        var y, x, years, endYear, svgGraph, line, countryLine, xReversed, yReversed;
+        var y, x, years, endYear, svgGraph, line, percentLine, indexLine, xReversed, yReversed;
         var dragging = false; // disable the frame after mouse up
         
         svgGraph = d3.select(element[0]).append("svg")
@@ -37,8 +37,10 @@ angular.module('app').directive("graph", function() {
 
             line = d3.svg.line().x(function(d) { return x(d.x) })
                                 .y(function(d) { return y(d.y) });
-            countryLine = d3.svg.line().x(function(d) { return x(d.year) })
-                                       .y(function(d) { return y(d.perCent) });
+            percentLine = d3.svg.line().x(function(d) { return x(d.year) })
+                                       .y(function(d) { return y(d.percent) });
+            indexLine = d3.svg.line().x(function(d) { return x(d.year) })
+                                     .y(function(d) { return y(d.percentGrowth) });
 
             var xPoints = [[{x: startYear, y: startPercent}, {x: endYear, y: startPercent }]]; // not sure why array inside array necessary
             var yPoints = [[{x: startYear, y: startPercent}, {x: startYear, y: endPercent }]];
@@ -72,84 +74,12 @@ angular.module('app').directive("graph", function() {
                     .attr("x2", x(startYear));
         });
 
-        scope.$watch('mode', function(countries) {
-            svgGraph.selectAll("path.country-line").remove();
+        scope.$watch('mode', function(mode) {
+            modeSwitch(mode);
         }, true);
-
+        
         scope.$watch('countries', function(countries) {
-            if (scope.mode != "countries") { return; }
-
-            var data = [];
-            angular.forEach(countries, function(country, countryCode) {
-                data.push(country);
-            });
-
-            var countryLines = svgGraph.selectAll("path.country-line").data(data, function(d) {
-                return (d.code);
-            });
-            // update()
-            defineBehavior(countryLines);
-            // enter()
-            defineBehavior(countryLines.enter().append("svg:path"));
-            countryLines.exit().remove();
-
-            defineCountryNameBehavior(svgGraph.selectAll("text.countryName"));
-            defineCountryNameBehavior(countryLines.enter().append("svg:text"));
-            
-            function defineCountryNameBehavior(selection) {
-                selection
-                    .attr("class", function(d) { return (d.active ? "countryName countryNameActive" : "countryName") })
-                    .text(function(d) { return d.name })
-                    .attr("x", function(d) { return x(endYear + 0.2) })
-                    .attr("y", function(d) { 
-                        if (Object.keys(d.dataPoints).length == 0) {
-                            return 0;
-                        } else {
-                            return y(d.dataPoints["year" + scope.limits.endYear].perCent) 
-                        }
-                    })
-                    .attr("text-anchor", "left").attr("dy", 3);
-            }
-
-            function defineBehavior(selection) { // since behavior is same for enter() and update(), pull it into a function
-                selection.attr("class", function(d) { return (d.regionCode + " country-line") })
-                    .classed("active", function(d) { return d.active })
-                    .attr("country", function(d) { return (d.code) })
-                    .attr("d", function(d) { 
-                        var visiblePoints = [];
-                        angular.forEach(d.dataPoints, function(p, yearStr) {
-                            if (p.visible) { visiblePoints.push(p) }
-                        })
-                        return countryLine(visiblePoints) 
-                    })
-                    .style("visibility", function(d) { return (d.state) }) // if "highlighted", just interpreted as visible
-                    .classed('highlighted', function(d) { return (d.state == "highlighted" ? true : false) })
-                    .on("click", togglePermaActive)
-                    .on("mouseover", setActive)
-                    .on("mouseout", unsetActive);
-            }
-
-            function togglePermaActive(d) {
-                scope.$apply(function() {
-                    scope.$parent.countries[d.code].active = false;
-                    scope.$parent.togglePermaActive(d);
-                });
-            }
-
-            function setActive(d) {
-                if (d.activePersistent) { return; }
-                scope.$apply(function() {
-                    scope.$parent.countries[d.code].active = true;
-                });
-            }
-
-            function unsetActive(d) {
-                if (d.activePersistent) { return; }
-                scope.$apply(function() {
-                    scope.$parent.countries[d.code].active = false;
-                });
-            }
-
+            modeSwitch(scope.mode);
         }, true);
 
         scope.$watch('year', function(year) {
@@ -163,6 +93,106 @@ angular.module('app').directive("graph", function() {
                .attr("d", line)
                .attr("class", "axis year");
         });
+        
+        function modeSwitch(mode) {
+            
+            if (mode.dataSource == "countries") {
+                console.log(scope.countries);
+                switch (mode.graphType) {
+                    case "percent":
+                        drawCountriesPercent(scope.countries);
+                        break;
+                    case "index":
+                        svgGraph.selectAll("path.country-line").remove();
+                        drawCountriesIndex(scope.countries);
+                        break;
+                }
+            } else if (mode.dataSource == "regions") {
+                
+                
+            }
+        }
+        
+        function drawCountriesPercent(countries) {
+            var active = [];
+            var data = _.reject(countries, function(country) {
+                if (country.active) { active.push(country) }
+                return(country.state == "hidden");
+            });
+            
+            var countryLines = svgGraph.selectAll("path.country-line").data(data);
+            defineBehavior(countryLines.enter().append("svg:path"), percentLine); // enter
+            defineBehavior(countryLines, percentLine); // update
+            countryLines.exit().remove(); // exit
+
+            var countryNames = svgGraph.selectAll("text.countryName").data(active);
+            defineCountryNameBehavior(countryNames.enter().append("svg:text")); // enter
+            defineCountryNameBehavior(countryNames); // update
+            countryNames.exit().remove(); // exit
+        }
+        
+        function drawCountriesIndex(countries) {
+            var data = _.reject(countries, {"state": "hidden"});
+            var countryLines = svgGraph.selectAll("path.country-line").data(data);
+            
+            defineBehavior(countryLines.enter().append("svg:path"), indexLine); // enter
+            defineBehavior(countryLines, indexLine); // update
+            countryLines.exit().remove(); // exit
+        }
+        
+        function defineCountryNameBehavior(selection) {
+            selection
+            .attr("class", function(d) { return (d.active ? "countryName countryNameActive" : "countryName") })
+            .text(function(d) { return d.name })
+            .attr("x", function(d) { return x(endYear + 0.2) })
+            .attr("y", function(d) { 
+                if (Object.keys(d.dataPoints).length == 0) {
+                    return 0;
+                } else {
+                    return y(d.dataPoints["year" + scope.limits.endYear].percent) 
+                }
+            })
+            .attr("text-anchor", "left").attr("dy", 3);
+        }
+        
+        function defineBehavior(selection, lineFunction) { // since behavior is same for enter() and update(), pull it into a function
+            selection
+            .attr("class", function(d) { return (d.regionCode + " country-line") })
+            .classed("active", function(d) { return d.active })
+            .attr("country", function(d) { return (d.code) })
+            .attr("d", function(d) { 
+                var visiblePoints = [];
+                angular.forEach(d.dataPoints, function(p, yearStr) {
+                    if (p.visible) { visiblePoints.push(p) }
+                })
+                return lineFunction(visiblePoints) 
+            })
+            .classed('highlighted', function(d) { return (d.state == "highlighted" ? true : false) })
+            .on("click", togglePermaActive)
+            .on("mouseover", setActive)
+            .on("mouseout", unsetActive);
+        }
+        
+        function togglePermaActive(d) {
+            scope.$apply(function() {
+                scope.$parent.countries[d.code].active = false;
+                scope.$parent.togglePermaActive(d);
+            });
+        }
+        
+        function setActive(d) {
+            if (d.activePersistent) { return; }
+            scope.$apply(function() {
+                scope.$parent.countries[d.code].active = true;
+            });
+        }
+        
+        function unsetActive(d) {
+            if (d.activePersistent) { return; }
+            scope.$apply(function() {
+                scope.$parent.countries[d.code].active = false;
+            });
+        }
 
         function startDragging() {
             dragging = true;
@@ -241,7 +271,7 @@ angular.module('app').directive("graph", function() {
                         percentLowerBound = Math.floor(yReversed(rect.y + rect.height));
                         percentUpperBound = Math.floor(yReversed(rect.y));
                         xVal = p.year;
-                        yVal = p.perCent;
+                        yVal = p.percent;
 
                         if (!(xVal >= yearLowerBound && xVal <= yearUpperBound && yVal >= percentLowerBound && yVal <= percentUpperBound)) {
                             p.visible = false

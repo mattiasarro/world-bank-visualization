@@ -98,7 +98,7 @@ angular.module('app').directive("map", function() {
             if (dataPoints != null) {
                 var dataPoint = dataPoints["year" + scope.year];
                 if (dataPoint != null) {
-                    return(dataPoint.perCent);
+                    return(dataPoint.percent);
                 } else {
                     return(0)
                 }

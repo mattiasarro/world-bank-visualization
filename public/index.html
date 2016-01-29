@@ -3,18 +3,15 @@
 <html ng-app="app" ng-init="year=2005">
 <head>
     <title>Internet Usage</title>
-    <script type="text/javascript" src="vendor/jquery-1.4.4.min.js"> </script>
+    <script type="text/javascript" src="lodash.min.js"> </script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://d3js.org/d3.geo.projection.v0.min.js"></script>
-    <script src="http://d3js.org/queue.v1.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
     <script type="text/javascript" src="vendor/d3.time.js?1.29.1"> </script>
     <script type="text/javascript" src="vendor/d3.csv.js?1.29.1"> </script>
     <script type="text/javascript" src="vendor/angular.min.js?1.4.9"> </script>
     <script type="text/javascript" src="vendor/d3.geomap.dependencies.min.js#v=#v=1"></script>
     <script type="text/javascript" src="vendor/d3.geomap.min.js#v=#v=1"></script>
-    
-
     <script type="text/javascript" src="convert.js"> </script>
     <script type="text/javascript" src="controllers.js"> </script>
     <script type="text/javascript" src="directive-graph.js"> </script>
@@ -29,8 +26,8 @@
         <h1>
             Internet Usage 
             <span class="buttons">
-                <button type="button" class="btn {{btnActive('countries')}}" ng-click="setMode('countries')">Countries (lines)</button>
-                <button type="button" class="btn {{btnActive('regions')}}" ng-click="setMode('regions')">Regions (stack)</button>
+                <button type="button" class="btn {{btnActive('countries', 'percent')}}" ng-click="setMode('countries', 'percent')">Countries (%)</button>
+                <button type="button" class="btn {{btnActive('countries', 'index')}}" ng-click="setMode('countries', 'index')">Countries (idx)</button>
             </span>
         </h1>
         <div class="row">

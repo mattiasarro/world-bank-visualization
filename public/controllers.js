@@ -1,7 +1,10 @@
 app = angular.module('app', []);
 
 app.controller('GraphController', function($scope, $http) {
-    $scope.mode = 'countries';
+    $scope.mode = {
+        dataSource: 'countries', // | regions
+        graphType: 'percent' // | index | absolute | stack
+    };
     $scope.limits = {
         startYear: 1994,
         endYear: 2014,
@@ -58,7 +61,7 @@ app.controller('GraphController', function($scope, $http) {
                 var value = values[j];
                 var year = years[j];
                 if (row[0] == "Internet users (per 100 people)") {
-                    key = "perCent"
+                    key = "percent"
                 } else if (row[0] == "Population, total") {
                     key = "population";
                 }
@@ -77,6 +80,12 @@ app.controller('GraphController', function($scope, $http) {
                     };
                 }
                 dataPoints["year" + year][key] = value;
+                if (key == "percent") {
+                    var thisYear = dataPoints["year" + year]
+                    var prevYear = dataPoints["year" + String(year - 1)];
+                    var growth = thisYear.percent - (prevYear == undefined ? 0 : prevYear.percent);
+                    dataPoints["year" + year]["percentGrowth"] = growth;
+                }
             };
             return dataPoints;
         }
@@ -93,12 +102,14 @@ app.controller('GraphController', function($scope, $http) {
     });
 
     
-    $scope.btnActive = function(mode) {
-        return($scope.mode == mode ? "btn-active" : "");
+    $scope.btnActive = function(dataSource, graphType) {
+        var active = $scope.mode.dataSource == dataSource && $scope.mode.graphType == graphType;
+        return(active ? "btn-active" : "");
     }
     
-    $scope.setMode = function(mode) {
-        $scope.mode = mode;
+    $scope.setMode = function(dataSource, graphType) {
+        $scope.mode.dataSource = dataSource;
+        $scope.mode.graphType = graphType;
     }
     
     $scope.togglePermaActive = function(country) {

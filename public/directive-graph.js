@@ -44,7 +44,9 @@ angular.module('app').directive("graph", function() {
             svgGraph.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis xAxis"); // x-axis
             svgGraph.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis yAxis"); // y-axis
 
-            svgGraph.selectAll(".xLabel").data(x.ticks(5))
+			//define the tick to avoid the floating point years
+			var xTicks = years.length >= 5 ? 5 : years.length - 1;
+            svgGraph.selectAll(".xLabel").data(x.ticks(xTicks))
                     .enter().append("svg:text")
                     .attr("class", "xLabel")
                     .text(String).attr("x", x)
@@ -54,7 +56,7 @@ angular.module('app').directive("graph", function() {
                     .attr("class", "yLabel")
                     .text(String).attr("x", 0).attr("y", y)
                     .attr("text-anchor", "right").attr("dy", 3);
-            svgGraph.selectAll(".xTicks").data(x.ticks(5))
+            svgGraph.selectAll(".xTicks").data(x.ticks(xTicks))
                     .enter().append("svg:line")
                     .attr("class", "xTicks")
                     .attr("x1", x)

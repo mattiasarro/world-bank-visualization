@@ -2,7 +2,7 @@ app = angular.module('app', []);
 
 app.controller('GraphController', ["$scope", "$http", "helpers", function($scope, $http, helpers) {
     $scope.mode = {
-        dataSource: 'countries', // | regions
+        dataSource: 'regions', // | regions
         graphType: 'percent' // | index | absolute | stack
     };
     $scope.growth  = {
@@ -19,13 +19,13 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     $scope.year = $scope.limits.startYear;
     
     $scope.regions = {
-        "ECS": {name: "Europe and Central Asia", state: "visible"},
-        "NAC": {name: "North America", state: "visible"},
-        "LCN": {name: "Latin America & Caribbean", state: "visible"},
-        "EAS": {name: "East Asia & Pacific", state: "visible"},
-        "SAS": {name: "South Asia", state: "visible"},
-        "MEA": {name: "Middle East & North Africa", state: "visible"},
-        "SSF": {name: "Sub-Saharan Africa", state: "visible"},
+        "ECS": {code: "ECS", name: "Europe and Central Asia", state: "visible", active: false},
+        "NAC": {code: "NAC", name: "North America", state: "visible", active: false},
+        "LCN": {code: "LCN", name: "Latin America & Caribbean", state: "visible", active: false},
+        "EAS": {code: "EAS", name: "East Asia & Pacific", state: "visible", active: false},
+        "SAS": {code: "SAS", name: "South Asia", state: "visible", active: false},
+        "MEA": {code: "MEA", name: "Middle East & North Africa", state: "visible", active: false},
+        "SSF": {code: "SSF", name: "Sub-Saharan Africa", state: "visible", active: false},
     };
 
     $scope.countries = {};
@@ -152,6 +152,18 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     
     $scope.deactivateCountry = function(country) {
         $scope.$broadcast('deactivate', country);
+    }    
+    
+    $scope.activateRegion = function(region, fromView) {
+        $scope.$apply(function() {
+            $scope.regions[region.code].active = true;
+        });
+    }
+    
+    $scope.deactivateRegion = function(region, fromView) {
+        $scope.$apply(function() {
+            $scope.regions[region.code].active = false;
+        });
     }
     
     $scope.toggleRegion = function(regionCode) {

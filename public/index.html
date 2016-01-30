@@ -38,7 +38,7 @@
         <div id="filters">
             <a ng-repeat="(id, region) in regions" 
                id="{{id}}" 
-               class="{{id}}-{{region.state}}"
+               class="{{id}}-{{region.state}} {{region.active ? 'active' : ''}}"
                ng-click="toggleRegion(id)">{{region.name}}</a>
             
         </div>

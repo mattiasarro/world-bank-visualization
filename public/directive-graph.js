@@ -100,6 +100,9 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             
             if (mode.dataSource == "countries") {
                 var callbacks = {
+                    classFunction: function(d) { 
+                        return (d.regionCode + " graph-line country-" + d.code) 
+                    },
                     click: scope.togglePermaActive,
                     mouseover: scope.activateCountry,
                     mouseout: scope.deactivateCountry
@@ -109,7 +112,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                         drawLines(scope.countries, percentLine, callbacks);
                         break;
                     case "index":
-                        svgGraph.selectAll("path.country-line").remove();
+                        svgGraph.selectAll("path.graph-line").remove();
                         drawLines(scope.countries, indexLine, callbacks);
                         break;
                 }
@@ -117,11 +120,14 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 switch (mode.graphType) {
                     case "percent":
                         var callbacks = {
-                            click: scope.togglePermaActive,
-                            mouseover: scope.activateCountry,
-                            mouseout: scope.deactivateCountry
+                            classFunction: function(d) { 
+                                return ("graph-line region-line region-" + d.code) 
+                            },
+                            // click: scope.togglePermaActive, // explode!
+                            mouseover: scope.activateRegion,
+                            mouseout: scope.deactivateRegion
                         }
-                        drawLines(scope.regions,percentLine, callbacks);
+                        drawLines(scope.regions, percentLine, callbacks);
                         break;
                     case "index":
                         break;
@@ -131,7 +137,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         
         function drawLines(elements, lineFunction, callbacks) {
             var data = _.reject(elements, {state: "hidden"});
-            var countryLines = svgGraph.selectAll("path.country-line").data(data);
+            var countryLines = svgGraph.selectAll("path.graph-line").data(data);
             defineBehavior(countryLines, lineFunction, callbacks); // update
             defineBehavior(countryLines.enter().append("svg:path"), lineFunction, callbacks); // enter
             countryLines.exit().remove(); // exit
@@ -154,7 +160,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         
         function defineBehavior(selection, lineFunction, callbacks) { // since behavior is same for enter() and update(), pull it into a function
             selection
-            .attr("class", function(d) { return (d.regionCode + " country-line country-" + d.code) })
+            .attr("class", callbacks.classFunction)
             .classed("active", function(d) { return d.permaActive })
             .attr("d", function(d) { 
                 var visiblePoints = [];

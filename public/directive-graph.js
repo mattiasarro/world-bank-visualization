@@ -1,6 +1,7 @@
-angular.module('app').directive("graph", function() {
+angular.module('app').directive("graph", ['helpers', function(helpers) {
     function link(scope, element, attr) {
-
+    
+        
         var width = 925;
         var height = 550;
         var margin = 30;
@@ -114,11 +115,7 @@ angular.module('app').directive("graph", function() {
         }
         
         function drawCountriesPercent(countries) {
-            var active = [];
-            var data = _.reject(countries, function(country) {
-                if (country.active) { active.push(country) }
-                return(country.state == "hidden");
-            });
+            var data = _.reject(countries, {state: "hidden"});
             
             var countryLines = svgGraph.selectAll("path.country-line").data(data);
             defineBehavior(countryLines, percentLine); // update
@@ -140,15 +137,12 @@ angular.module('app').directive("graph", function() {
         function defineCountryNameBehavior(selection) {
             selection
             .attr("class", function(d){ return("countryName countryName-" + d.code) })
-            .text(function(d) { console.log(d); return( d.name); })
+            .text(function(d) { return( d.name); })
             .attr("x", function(d) { return x(endYear + 0.2) })
             .attr("y", function(d) { 
                 if (Object.keys(d.dataPoints).length == 0) {
-                    console.log("here 0");
                     return 0;
                 } else {
-                    console.log("here 1");
-                    console.log(d.dataPoints["year" + scope.limits.endYear]);
                     return y(d.dataPoints["year" + scope.limits.endYear].percent) 
                 }
             })
@@ -158,6 +152,7 @@ angular.module('app').directive("graph", function() {
         function defineBehavior(selection, lineFunction) { // since behavior is same for enter() and update(), pull it into a function
             selection
             .attr("class", function(d) { return (d.regionCode + " country-line country-" + d.code) })
+            .classed("active", function(d) { return d.permaActive })
             .attr("d", function(d) { 
                 var visiblePoints = [];
                 angular.forEach(d.dataPoints, function(p, yearStr) {
@@ -166,30 +161,27 @@ angular.module('app').directive("graph", function() {
                 return lineFunction(visiblePoints) 
             })
             .classed('highlighted', function(d) { return (d.state == "highlighted" ? true : false) })
-            .on("click", togglePermaActive)
-            .on("mouseover", setActive)
-            .on("mouseout", unsetActive);
+            .on("click", scope.togglePermaActive)
+            .on("mouseover", scope.activateCountry)
+            .on("mouseout", scope.deactivateCountry);
         }
         
-        function togglePermaActive(d) {
-            scope.$apply(function() {
-                scope.$parent.countries[d.code].active = false;
-                scope.$parent.togglePermaActive(d);
-            });
-        }
-        
-        function setActive(d) {
-            d3.selectAll(".country-" + d.code).classed("active", true);
-            var country = scope.countries[d.code];
-            var countryNames = svgGraph.selectAll("text.countryName-" + d.code).data([country]);            
+        scope.$on('activate', function(event, country) {
+            console.log("activate" + country.code);
+            var countryNames = svgGraph.selectAll("text.countryName-" + country.code).data([country]);            
             defineCountryNameBehavior(countryNames.enter().append("svg:text"));
-        }
+            d3.selectAll("li.country-" + country.code).classed("active", true);
+            d3.selectAll("path.country-" + country.code).classed("active", true);
+        })
         
-        function unsetActive(d) {
-            if (d.activePersistent) { return; }
-            d3.selectAll(".country-" + d.code).classed("active", false);
-            d3.selectAll(".countryName-" + d.code).remove();
-        }
+        scope.$on('deactivate', function(event, country) {
+            console.log("deactivate " + country.code);
+            
+            if (country.permaActive) { return; }
+            d3.selectAll(".country-" + country.code).classed("active", false);
+            d3.selectAll(".countryName-" + country.code).remove();
+
+        })
 
         function startDragging() {
             dragging = true;
@@ -299,4 +291,4 @@ angular.module('app').directive("graph", function() {
         restrict: 'A',
         scope: true
     }
-});
+}]);

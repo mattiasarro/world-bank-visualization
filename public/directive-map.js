@@ -5,7 +5,6 @@ angular.module('app').directive("map", function() {
             
             setMap();
             scope.$watch('countries', function(countries) {
-                transferData(countries, world.objects.countries.geometries);
                 drawMap(world); // let's mug the map now with our newly populated data object
             }, true);
             
@@ -51,47 +50,32 @@ angular.module('app').directive("map", function() {
         }
 
         function drawMap(world) {
-            svg.selectAll(".country") // select country objects (which don't exist yet)
                 .data(topojson.feature(world, world.objects.countries).features) // bind data to these non-existent objects
                 .enter().append("path") // prepare data to be appended to paths
-                .attr("class", "country") // give them a class for styling and access later
                 .attr("id", function(d) {
-                    return "code_" + d.properties.id;
                 }, true) // give each a unique id for access later
                 .attr("d", path); // create them using the svg path generator defined above
 
-            d3.selectAll('.country') // select all the countries
                 .attr('data-value', getValue)
-                .style('stroke', getBorderColor)
                 .style('fill', getColor)
-                .on("click", togglePermaActive)
-                .on("mouseover", setActive)
-                .on("mouseout", unsetActive);
         }
         
-        // these are duplicated from directive-graph but didn't manage to nicely refactor given the time constraints
-        function togglePermaActive(d) {
-            scope.$apply(function() {
-                scope.$parent.countries[d.properties.code].active = false;
-                scope.$parent.togglePermaActive(d.properties);
-            });
-        }
-
-        function setActive(d) {
-            var country = scope.$parent.countries[d.properties.code];
             if (d.properties.activePersistent || country == undefined) { return; }
-            scope.$apply(function() {
-                scope.$parent.countries[d.properties.code].active = true;
             });
         }
+        scope.$on('activate', function(event, country) {
+            console.log("MAPactivate" + country.code);
+            svg.selectAll(".countryArea-" + country.code).classed("active", true);
+        })
+        
+        scope.$on('deactivate', function(event, country) {
+            console.log("MAPdeactivate " + country.code);
+            
+            if (country.permaActive) { return; }
+            svg.selectAll(".countryArea-" + country.code).classed("active", false);
 
-        function unsetActive(d) {
-            var country = scope.$parent.countries[d.properties.code];
             if (d.properties.activePersistent || country == undefined) { return; }
-            scope.$apply(function() {
-                scope.$parent.countries[d.properties.code].active = false;
-            });
-        }
+        })
         
         function getValue(d) {
             var dataPoints = d.properties.dataPoints;
@@ -113,16 +97,7 @@ angular.module('app').directive("map", function() {
             }
         }
         
-        var highlights = {
-            "SAS": "#895881",
-            "ECS": "#ED7C31",
-            "MEA": "#effa75",
-            "SSF": "#6E9E75",
-            "LCN": "#00BBD6",
-            "EAS": "#e25f82",
-            "NAC": "#be1932"
-        };
-        
+
         function getBorderColor(d) {
             if (d.properties.active) {
                 return "#000000";

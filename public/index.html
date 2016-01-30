@@ -14,6 +14,7 @@
     <script type="text/javascript" src="vendor/d3.geomap.min.js#v=#v=1"></script>
     <script type="text/javascript" src="convert.js"> </script>
     <script type="text/javascript" src="controllers.js"> </script>
+    <script type="text/javascript" src="helpers.js"> </script>
     <script type="text/javascript" src="directive-graph.js"> </script>
     <script type="text/javascript" src="directive-map.js"> </script>
     <link href='http://fonts.googleapis.com/css?family=Bevan|Cardo' rel=' stylesheet' type=' text/css'>
@@ -44,6 +45,7 @@
             <ul class="f16">
               <li ng-repeat="(countryCode, country) in countries" 
                   class="flag {{country.codeAlpha2 | lowercase}} 
+                         country-{{country.code}}
                          flag-{{country.state}}-{{country.regionCode}}
                          flag-active-{{country.active}}"
                   ng-click="togglePermaActive(country)"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>

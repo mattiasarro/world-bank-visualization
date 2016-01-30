@@ -102,7 +102,7 @@ path.active, path.highlighted.active {
 .flag-hidden-EAS, 
 .flag-hidden-NAC {
 } 
-.flag-active-true {
+.flag.active {
     border: 2px solid black;
 }
 .SAS.highlighted {
@@ -241,9 +241,30 @@ text {
   stroke: #fff;
   stroke-width: .5px;
 }
-.country {
+.countryArea {
     fill: steelblue;
     stroke: white;
+    stroke-width: .5px;
+}
+.countryArea.highlighted.region-SAS { stroke: #895881 }
+.countryArea.highlighted.region-ECS { stroke: #ED7C31 }
+.countryArea.highlighted.region-MEA { stroke: #effa75 }
+.countryArea.highlighted.region-SSF { stroke: #6E9E75 }
+.countryArea.highlighted.region-LCN { stroke: #00BBD6 }
+.countryArea.highlighted.region-EAS { stroke: #e25f82 }
+.countryArea.highlighted.region-NAC { stroke: #be1932 }
+.countryArea.highlighted.region-SAS,
+.countryArea.highlighted.region-ECS,
+.countryArea.highlighted.region-MEA,
+.countryArea.highlighted.region-SSF,
+.countryArea.highlighted.region-LCN,
+.countryArea.highlighted.region-EAS,
+.countryArea.highlighted.region-NAC {
+    stroke-width: .5px;
+}
+.countryArea.active {
+    stroke: #000000;
+    stroke-width: .5px;
 }
 #play, #clock {
   position: absolute;

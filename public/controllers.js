@@ -1,6 +1,6 @@
 app = angular.module('app', []);
 
-app.controller('GraphController', function($scope, $http) {
+app.controller('GraphController', ["$scope", "$http", "helpers", function($scope, $http, helpers) {
     $scope.mode = {
         dataSource: 'countries', // | regions
         graphType: 'percent' // | index | absolute | stack
@@ -124,8 +124,21 @@ app.controller('GraphController', function($scope, $http) {
     }
     
     $scope.togglePermaActive = function(country) {
-        $scope.countries[country.code].active = !$scope.countries[country.code].active;
-        $scope.countries[country.code].activePersistent = !$scope.countries[country.code].activePersistent;
+        if ($scope.countries[country.code].permaActive) {
+            $scope.countries[country.code].permaActive = false;
+            $scope.$broadcast('deactivate', country);
+        } else {
+            $scope.countries[country.code].permaActive = true;
+            $scope.$broadcast('activate', country);
+        }
+    }
+    
+    $scope.activateCountry = function(country) {
+        $scope.$broadcast('activate', country);
+    }
+    
+    $scope.deactivateCountry = function(country) {
+        $scope.$broadcast('deactivate', country);
     }
     
     $scope.toggleRegion = function(regionCode) {
@@ -144,4 +157,4 @@ app.controller('GraphController', function($scope, $http) {
             }
         });
     }
-});
+}]);

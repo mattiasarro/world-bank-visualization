@@ -97,7 +97,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         });
         
         function modeSwitch(mode) {
-            
+            svgGraph.selectAll("path.graph-line").remove();
+
             if (mode.dataSource == "countries") {
                 var callbacks = {
                     classFunction: function(d) { 
@@ -112,24 +113,24 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                         drawLines(scope.countries, percentLine, callbacks);
                         break;
                     case "index":
-                        svgGraph.selectAll("path.graph-line").remove();
                         drawLines(scope.countries, indexLine, callbacks);
                         break;
                 }
             } else if (mode.dataSource == "regions") {
+                var callbacks = {
+                    classFunction: function(d) { 
+                        return ("graph-line region-line region-" + d.code) 
+                    },
+                    // click: scope.togglePermaActive, // explode!
+                    mouseover: scope.activateRegion,
+                    mouseout: scope.deactivateRegion
+                }
                 switch (mode.graphType) {
                     case "percent":
-                        var callbacks = {
-                            classFunction: function(d) { 
-                                return ("graph-line region-line region-" + d.code) 
-                            },
-                            // click: scope.togglePermaActive, // explode!
-                            mouseover: scope.activateRegion,
-                            mouseout: scope.deactivateRegion
-                        }
                         drawLines(scope.regions, percentLine, callbacks);
                         break;
                     case "index":
+                        drawLines(scope.regions, indexLine, callbacks);
                         break;
                 }
             }

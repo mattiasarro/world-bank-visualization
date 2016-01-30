@@ -42,7 +42,7 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
             var rows = d3.csv.parseRows(text);
             for (i = 1; i < rows.length; i++) {
                 var countryCode = rows[i][3];                
-                var dataPoints = extractData({}, rows[i]);
+                var dataPoints = extractData({}, rows[i], "countries");
                 var alpha2 = iso_3366_1_Alpha3_to_Alpha2[countryCode];
                 
                 if (alpha2 != undefined && Object.keys(dataPoints).length > 0) {
@@ -59,7 +59,17 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
             }
         });
         
-        function extractData(dataPoints, row) {
+        $http.get('internet-usage-regions.csv').success(function(text) {
+            var rows = d3.csv.parseRows(text);
+            for (i = 1; i < rows.length; i++) {
+                var regionCode = rows[i][3];
+                var region = $scope.regions[regionCode];
+                var dataPoints = region.dataPoints == undefined ? {} : region.dataPoints;
+                $scope.regions[regionCode].dataPoints = extractData(dataPoints, rows[i], "regions");
+            };
+        });
+        
+        function extractData(dataPoints, row, dataSource) {
             var values = row.slice(4, row.length);
             var code = row[3];
             for (j = 0; j < values.length; j++) {
@@ -89,23 +99,14 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
                     var thisYear = dataPoints["year" + year]
                     var prevYear = dataPoints["year" + String(year - 1)];
                     var growth = thisYear.percent - (prevYear == undefined ? 0 : prevYear.percent);
-                    if (growth < $scope.growth.countries.min) { $scope.growth.countries.min = growth }
-                    if (growth > $scope.growth.countries.max) { $scope.growth.countries.max = growth }
+                    if (growth < $scope.growth[dataSource].min) { $scope.growth[dataSource].min = growth }
+                    if (growth > $scope.growth[dataSource].max) { $scope.growth[dataSource].max = growth }
                     dataPoints["year" + year]["percentGrowth"] = growth;
                 }
             };
             return dataPoints;
         }
 
-        $http.get('internet-usage-regions.csv').success(function(text) {
-            var rows = d3.csv.parseRows(text);
-            for (i = 1; i < rows.length; i++) {
-                var regionCode = rows[i][3];
-                var region = $scope.regions[regionCode];
-                var dataPoints = region.dataPoints == undefined ? {} : region.dataPoints;
-                $scope.regions[regionCode].dataPoints = extractData(dataPoints, rows[i]);
-            }
-        });
     });
 
     

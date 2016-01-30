@@ -99,38 +99,41 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         function modeSwitch(mode) {
             
             if (mode.dataSource == "countries") {
+                var callbacks = {
+                    click: scope.togglePermaActive,
+                    mouseover: scope.activateCountry,
+                    mouseout: scope.deactivateCountry
+                }
                 switch (mode.graphType) {
                     case "percent":
-                        drawCountriesPercent(scope.countries);
+                        drawLines(scope.countries, percentLine, callbacks);
                         break;
                     case "index":
                         svgGraph.selectAll("path.country-line").remove();
-                        drawCountriesIndex(scope.countries);
+                        drawLines(scope.countries, indexLine, callbacks);
                         break;
                 }
             } else if (mode.dataSource == "regions") {
-                
-                
+                switch (mode.graphType) {
+                    case "percent":
+                        var callbacks = {
+                            click: scope.togglePermaActive,
+                            mouseover: scope.activateCountry,
+                            mouseout: scope.deactivateCountry
+                        }
+                        drawLines(scope.regions,percentLine, callbacks);
+                        break;
+                    case "index":
+                        break;
+                }
             }
         }
         
-        function drawCountriesPercent(countries) {
-            var data = _.reject(countries, {state: "hidden"});
-            
+        function drawLines(elements, lineFunction, callbacks) {
+            var data = _.reject(elements, {state: "hidden"});
             var countryLines = svgGraph.selectAll("path.country-line").data(data);
-            defineBehavior(countryLines, percentLine); // update
-            defineBehavior(countryLines.enter().append("svg:path"), percentLine); // enter
-            countryLines.exit().remove(); // exit
-
-
-        }
-        
-        function drawCountriesIndex(countries) {
-            var data = _.reject(countries, {"state": "hidden"});
-            var countryLines = svgGraph.selectAll("path.country-line").data(data);
-            
-            defineBehavior(countryLines, indexLine); // update
-            defineBehavior(countryLines.enter().append("svg:path"), indexLine); // enter
+            defineBehavior(countryLines, lineFunction, callbacks); // update
+            defineBehavior(countryLines.enter().append("svg:path"), lineFunction, callbacks); // enter
             countryLines.exit().remove(); // exit
         }
         
@@ -149,7 +152,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             .attr("text-anchor", "left").attr("dy", 3);
         }
         
-        function defineBehavior(selection, lineFunction) { // since behavior is same for enter() and update(), pull it into a function
+        function defineBehavior(selection, lineFunction, callbacks) { // since behavior is same for enter() and update(), pull it into a function
             selection
             .attr("class", function(d) { return (d.regionCode + " country-line country-" + d.code) })
             .classed("active", function(d) { return d.permaActive })
@@ -161,9 +164,9 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 return lineFunction(visiblePoints) 
             })
             .classed('highlighted', function(d) { return (d.state == "highlighted" ? true : false) })
-            .on("click", scope.togglePermaActive)
-            .on("mouseover", scope.activateCountry)
-            .on("mouseout", scope.deactivateCountry);
+            .on("click", callbacks.click)
+            .on("mouseover", callbacks.mouseover)
+            .on("mouseout", callbacks.mouseout);
         }
         
         scope.$on('activate', function(event, country) {

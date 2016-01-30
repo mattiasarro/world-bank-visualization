@@ -5,7 +5,10 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
         dataSource: 'countries', // | regions
         graphType: 'percent' // | index | absolute | stack
     };
-    $scope.growth  = { min: 0, max: 0 }
+    $scope.growth  = {
+        countries: { min: 0, max: 0 },
+        regions: { min: 0, max: 0 }
+    }
     $scope.percent = { min: 0, max: 100 }
     $scope.limits = {
         startYear: 1994,
@@ -86,8 +89,8 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
                     var thisYear = dataPoints["year" + year]
                     var prevYear = dataPoints["year" + String(year - 1)];
                     var growth = thisYear.percent - (prevYear == undefined ? 0 : prevYear.percent);
-                    if (growth < $scope.growth.min) { $scope.growth.min = growth }
-                    if (growth > $scope.growth.max) { $scope.growth.max = growth }
+                    if (growth < $scope.growth.countries.min) { $scope.growth.countries.min = growth }
+                    if (growth > $scope.growth.countries.max) { $scope.growth.countries.max = growth }
                     dataPoints["year" + year]["percentGrowth"] = growth;
                 }
             };
@@ -116,8 +119,13 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
         $scope.mode.graphType = graphType;
         var limits = angular.copy($scope.limits); // hack, otherwise doesn't trigger changed event
         if (graphType == "index") {
-            limits.min = $scope.growth.min;
-            limits.max = $scope.growth.max;
+            if (dataSource == "countries") {
+                limits.min = $scope.growth.countries.min;
+                limits.max = $scope.growth.countries.max;
+            } else if (dataSource == "regions") {
+                limits.min = $scope.growth.regions.min;
+                limits.max = $scope.growth.regions.max;
+            }
         } else if (graphType == "percent") {
             limits.min = $scope.percent.min;
             limits.max = $scope.percent.max;

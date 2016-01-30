@@ -114,13 +114,15 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     $scope.setMode = function(dataSource, graphType) {
         $scope.mode.dataSource = dataSource;
         $scope.mode.graphType = graphType;
+        var limits = angular.copy($scope.limits); // hack, otherwise doesn't trigger changed event
         if (graphType == "index") {
-            $scope.limits.min = $scope.growth.min;
-            $scope.limits.max = $scope.growth.max;
+            limits.min = $scope.growth.min;
+            limits.max = $scope.growth.max;
         } else if (graphType == "percent") {
-            $scope.limits.min = $scope.percent.min;
-            $scope.limits.max = $scope.percent.max;
+            limits.min = $scope.percent.min;
+            limits.max = $scope.percent.max;
         }
+        $scope.limits = limits;
     }
     
     $scope.togglePermaActive = function(country, fromView) {

@@ -61,7 +61,7 @@ angular.module('app').directive("map", function() {
                 .attr("d", path); // create them using the svg path generator defined above
 
             d3.selectAll('.country') // select all the countries
-                .attr('data-percent', getPercent)
+                .attr('data-value', getValue)
                 .style('stroke', getBorderColor)
                 .style('fill', getColor)
                 .on("click", togglePermaActive)
@@ -93,12 +93,18 @@ angular.module('app').directive("map", function() {
             });
         }
         
-        function getPercent(d) {
+        function getValue(d) {
             var dataPoints = d.properties.dataPoints;
             if (dataPoints != null) {
                 var dataPoint = dataPoints["year" + scope.year];
                 if (dataPoint != null) {
-                    return(dataPoint.percent);
+                    var key;
+                    if (scope.mode.graphType == "index") {
+                        key = "percentGrowth"
+                    } else {
+                        key = "percent"
+                    }
+                    return(dataPoint[key]);
                 } else {
                     return(0)
                 }
@@ -132,10 +138,10 @@ angular.module('app').directive("map", function() {
                 return("#ededed")
             } else {
                 var quantize = d3.scale.quantize()
-                .domain([0, 100])
+                .domain([scope.limits.min, scope.limits.max])
                 .range(["#c6d8ef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#085192", "#08306b"]);
                 
-                return quantize(getPercent(d)); // return that number to the caller
+                return quantize(getValue(d)); // return that number to the caller
             }
         }
         

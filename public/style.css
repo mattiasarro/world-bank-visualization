@@ -81,12 +81,6 @@ a {
 #vis {
   min-height: 550px;
 }
-.countryName {
-    opacity: 0;
-}
-.countryNameActive {
-    opacity: 1;
-}
 
 path {
   stroke: #e2e2e2;

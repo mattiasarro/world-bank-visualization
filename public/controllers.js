@@ -5,11 +5,13 @@ app.controller('GraphController', function($scope, $http) {
         dataSource: 'countries', // | regions
         graphType: 'percent' // | index | absolute | stack
     };
+    $scope.growth  = { min: 0, max: 0 }
+    $scope.percent = { min: 0, max: 100 }
     $scope.limits = {
         startYear: 1994,
         endYear: 2014,
-        startPercent: 0,
-        endPercent: 100
+        min: $scope.percent.min,
+        max: $scope.percent.max
     }
     $scope.year = $scope.limits.startYear;
     
@@ -84,6 +86,8 @@ app.controller('GraphController', function($scope, $http) {
                     var thisYear = dataPoints["year" + year]
                     var prevYear = dataPoints["year" + String(year - 1)];
                     var growth = thisYear.percent - (prevYear == undefined ? 0 : prevYear.percent);
+                    if (growth < $scope.growth.min) { $scope.growth.min = growth }
+                    if (growth > $scope.growth.max) { $scope.growth.max = growth }
                     dataPoints["year" + year]["percentGrowth"] = growth;
                 }
             };
@@ -110,6 +114,13 @@ app.controller('GraphController', function($scope, $http) {
     $scope.setMode = function(dataSource, graphType) {
         $scope.mode.dataSource = dataSource;
         $scope.mode.graphType = graphType;
+        if (graphType == "index") {
+            $scope.limits.min = $scope.growth.min;
+            $scope.limits.max = $scope.growth.max;
+        } else if (graphType == "percent") {
+            $scope.limits.min = $scope.percent.min;
+            $scope.limits.max = $scope.percent.max;
+        }
     }
     
     $scope.togglePermaActive = function(country) {

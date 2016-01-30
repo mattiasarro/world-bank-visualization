@@ -4,8 +4,9 @@ angular.module('app').directive("map", function() {
             var width, height, projection, path, graticule, svg, attributeArray = [], currentAttribute = 4, playing = false, countries;
             
             setMap();
-            scope.$watch('countries', function(countries) {
-                drawMap(world); // let's mug the map now with our newly populated data object
+            scope.$watch('countries', function(countries) {   
+                transferData(countries, world.objects.countries.geometries);       
+                drawMap(world, countries);
             }, true);
             
             scope.$watch('year', function() {
@@ -49,32 +50,43 @@ angular.module('app').directive("map", function() {
             }
         }
 
-        function drawMap(world) {
-                .data(topojson.feature(world, world.objects.countries).features) // bind data to these non-existent objects
-                .enter().append("path") // prepare data to be appended to paths
-                .attr("id", function(d) {
-                }, true) // give each a unique id for access later
-                .attr("d", path); // create them using the svg path generator defined above
-
-                .attr('data-value', getValue)
-                .style('fill', getColor)
+        function drawMap(world, countries) {
+            var countryAreas = svg.selectAll(".countryArea").data(topojson.feature(world, world.objects.countries).features);
+            defineBehavior(countryAreas) // bind data to these non-existent objects
+            defineBehavior(countryAreas.enter().append("path")) // select country objects (which don't exist yet)
         }
         
-            if (d.properties.activePersistent || country == undefined) { return; }
+        function defineBehavior(selection) {
+            selection
+            .attr("class", function(d) { return("countryArea region-" + d.properties.regionCode + " countryArea-" + d.properties.code) }) // give them a class for styling and access later
+            .attr("id", function(d) { return "countryArea-" + d.properties.id })
+            .attr("d", path)
+            .attr('data-value', getValue)
+            .classed("active", function(d) { return d.properties.permaActive })
+            .classed("highlighted", function(d) { 
+                var region = scope.regions[d.properties.regionCode];
+                return(region != undefined && region.state == "highlighted");
+            })
+            .style('fill', getColor)
+            .on("click", function(d) {
+                scope.togglePermaActive(d.properties);
+            })
+            .on("mouseover", function(d) {
+                scope.activateCountry(d.properties);
+            })
+            .on("mouseout", function(d) {
+                scope.deactivateCountry(d.properties);
             });
         }
+        
         scope.$on('activate', function(event, country) {
-            console.log("MAPactivate" + country.code);
             svg.selectAll(".countryArea-" + country.code).classed("active", true);
         })
         
-        scope.$on('deactivate', function(event, country) {
-            console.log("MAPdeactivate " + country.code);
-            
+        scope.$on('deactivate', function(event, country) {        
             if (country.permaActive) { return; }
             svg.selectAll(".countryArea-" + country.code).classed("active", false);
 
-            if (d.properties.activePersistent || country == undefined) { return; }
         })
         
         function getValue(d) {
@@ -96,7 +108,6 @@ angular.module('app').directive("map", function() {
                 return(0);
             }
         }
-        
 
         function getBorderColor(d) {
             if (d.properties.active) {
@@ -115,7 +126,6 @@ angular.module('app').directive("map", function() {
                 var quantize = d3.scale.quantize()
                 .domain([scope.limits.min, scope.limits.max])
                 .range(["#c6d8ef", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#085192", "#08306b"]);
-                
                 return quantize(getValue(d)); // return that number to the caller
             }
         }

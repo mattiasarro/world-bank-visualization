@@ -48,7 +48,9 @@
                          country-{{country.code}}
                          flag-{{country.state}}-{{country.regionCode}}
                          flag-active-{{country.active}}"
-                  ng-click="togglePermaActive(country)"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>
+                  ng-click="togglePermaActive(country, true)"
+                  ng-mouseover="activateCountry(country)"
+                  ng-mouseout="deactivateCountry(country)"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>
             </ul>
         </div>
         

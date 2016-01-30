@@ -167,7 +167,6 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         }
         
         scope.$on('activate', function(event, country) {
-            console.log("activate" + country.code);
             var countryNames = svgGraph.selectAll("text.countryName-" + country.code).data([country]);            
             defineCountryNameBehavior(countryNames.enter().append("svg:text"));
             d3.selectAll("li.country-" + country.code).classed("active", true);
@@ -175,8 +174,6 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         })
         
         scope.$on('deactivate', function(event, country) {
-            console.log("deactivate " + country.code);
-            
             if (country.permaActive) { return; }
             d3.selectAll(".country-" + country.code).classed("active", false);
             d3.selectAll(".countryName-" + country.code).remove();

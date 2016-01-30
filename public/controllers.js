@@ -123,13 +123,16 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
         }
     }
     
-    $scope.togglePermaActive = function(country) {
+    $scope.togglePermaActive = function(country, fromView) {
         if ($scope.countries[country.code].permaActive) {
             $scope.countries[country.code].permaActive = false;
             $scope.$broadcast('deactivate', country);
         } else {
             $scope.countries[country.code].permaActive = true;
             $scope.$broadcast('activate', country);
+        }
+        if (!fromView) {
+            $scope.$apply();
         }
     }
     

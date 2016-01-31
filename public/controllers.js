@@ -134,8 +134,8 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     }
     
     $scope.setMode = function(dataSource, graphType) {
-        $scope.mode.dataSource = dataSource;
-        $scope.mode.graphType = graphType;
+        var dataSource = $scope.mode.dataSource;
+        var graphType = $scope.mode.graphType;
         var limits = angular.copy($scope.limits); // hack, otherwise doesn't trigger changed event
         if (graphType == "percent") {
             limits.min = $scope.percent.min;

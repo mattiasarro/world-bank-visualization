@@ -29,15 +29,17 @@
                 <td></td>
                 <td>
                     <h1>
-                        Internet Usage 
-                        <span class="buttons">
-                            <button type="button" class="btn {{btnActive('countries', mode.graphType)}}" ng-click="setMode('countries', mode.graphType)">C</button>
-                            <button type="button" class="btn {{btnActive('regions', mode.graphType)}}" ng-click="setMode('regions', mode.graphType)">R</button>
-                            <button type="button" class="btn {{btnActive(mode.dataSource, 'percent')}}" ng-click="setMode(mode.dataSource, 'percent')">%</button>
-                            <button type="button" class="btn {{btnActive(mode.dataSource, 'growth')}}" ng-click="setMode(mode.dataSource, 'growth')">idx</button>
-                            <button type="button" class="btn {{btnActive(mode.dataSource, 'absolute')}}" ng-click="setMode(mode.dataSource, 'absolute')">abs</button>
-                            
-                        </span>
+                        Showing
+                        <select ng-model="mode.graphType" ng-change="setMode()">
+                            <option value="percent">percentage</option>
+                            <option value="growth">growth rate</option>
+                            <option value="absolute">total number</option>
+                        </select>
+                         of Internet users in different
+                        <select ng-model="mode.dataSource" ng-change="setMode">
+                            <option value="countries">countries</option>
+                            <option value="regions">world regions</option>
+                        </select>
                     </h1>
                 </td>
             </tr>
@@ -48,7 +50,6 @@
                         id="{{id}}" 
                         class="{{id}}-{{region.state}} region-{{region.code}}"
                         ng-click="toggleRegion(id)">{{region.name}}</a>
-                        
                     </div>
                     <div id="flags">
                         <ul class="f16">

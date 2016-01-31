@@ -2,16 +2,18 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
     function link(scope, element, attr) {
     
         
-        var width = 925;
+        var marginLeft = 35;
+        var marginTop = 20;
+        var marginBottom = 20;
+        var marginRight = 150; // area for names
+        var width = 925 + marginRight;
         var height = 550;
-        var margin = 30;
-        var rightMargin = 150;
         
         var y, x, years, endYear, svgGraph, line, percentLine, growthLine, absoluteLine, xReversed, yReversed;
         var dragging = false; // disable the frame after mouse up
         
         svgGraph = d3.select(element[0]).append("svg")
-                     .attr("width", width + rightMargin)
+                     .attr("width", width + marginRight)
                      .attr("height", height);
         
         svgGraph.on("mousedown", startDragging)
@@ -19,17 +21,18 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 .on("mouseup", stopDragging);
         
         scope.$watch('limits', function(countries) {
-            removeAxes();
+            svgGraph.selectAll(".x.axis").remove();
+            svgGraph.selectAll(".y.axis").remove();
             
             var startYear = scope.limits.startYear;
                 endYear = scope.limits.endYear;
             var min = scope.limits.min;
             var max = scope.limits.max;
             
-            yReversed = d3.scale.linear().domain([0 + margin, height - margin]).range([max, min]);
-            xReversed = d3.scale.linear().domain([0 + margin - 5, width]).range([0, endYear - startYear]);
-            y = d3.scale.linear().domain([max, min]).range([0 + margin, height - margin]);
-            x = d3.scale.linear().domain([startYear, endYear]).range([0 + margin - 5, width]);
+            yReversed = d3.scale.linear().domain([marginBottom, height - marginTop]).range([max, min]);
+            xReversed = d3.scale.linear().domain([marginLeft, width - marginRight]).range([0, endYear - startYear]);
+            y = d3.scale.linear().domain([max, min]).range([marginBottom, height - marginTop]);
+            x = d3.scale.linear().domain([startYear, endYear]).range([marginLeft, width - marginRight]);
             years = d3.range(startYear, endYear + 1);
 
             line = d3.svg.line().x(function(d) { return x(d.x) })
@@ -41,36 +44,34 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             absoluteLine = d3.svg.line().x(function(d) { return x(d.year) })
                                         .y(function(d) { return y(d.absolute) });
 
-            var xPoints = [[{x: startYear, y: min}, {x: endYear, y: min }]]; // not sure why array inside array necessary
-            var yPoints = [[{x: startYear, y: min}, {x: startYear, y: max }]];
-            svgGraph.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis xAxis"); // x-axis
-            svgGraph.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis yAxis"); // y-axis
+            var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom")
+                .ticks(10)
+                .tickFormat(Number)
+                .tickSize(5, 0);
+            svgGraph.append("g")
+                .attr("transform", "translate(" + 0 + "," + (height-marginBottom) + ")")
+                .attr("class", "x axis")
+                .call(xAxis);
             
-            var xTicks = years.length >= 5 ? 5 : years.length - 1; // avoid the floating point years
-            svgGraph.selectAll(".xLabel").data(x.ticks(xTicks))
-                    .enter().append("svg:text")
-                    .attr("class", "xLabel")
-                    .text(String).attr("x", x)
-                    .attr("y", height - 10).attr("text-anchor", "middle");
-            svgGraph.selectAll(".yLabel").data(y.ticks(4))
-                    .enter().append("svg:text")
-                    .attr("class", "yLabel")
-                    .text(String).attr("x", 0).attr("y", y)
-                    .attr("text-anchor", "right").attr("dy", 3);
-            svgGraph.selectAll(".xTicks").data(x.ticks(xTicks))
-                    .enter().append("svg:line")
-                    .attr("class", "xTicks")
-                    .attr("x1", x)
-                    .attr("y1", y(min))
-                    .attr("x2", x)
-                    .attr("y2", y(min) + 7);
-            svgGraph.selectAll(".yTicks").data(y.ticks(4))
-                    .enter().append("svg:line")
-                    .attr("class", "yTicks")
-                    .attr("y1", y)
-                    .attr("x1", x(startYear - 0.1))
-                    .attr("y2", y)
-                    .attr("x2", x(startYear));
+            var tickFormat = function(d) { 
+                var ret = y.tickFormat(4, " s")(d).replace('G', 'B');
+                if (scope.mode.graphType == "percent" || scope.mode.graphType == "growth") {
+                    ret += "%";
+                }
+                return(ret);
+            }
+            var yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left")
+                .ticks(4)
+                .tickFormat(tickFormat) // replace Giga with Billion
+                .tickSize(5, 0);
+            svgGraph.append("g")
+                .attr("transform", "translate(" + (marginLeft) + "," + 0 + ")")
+                .attr("class", "y axis")
+                .call(yAxis);
         });
 
         scope.$watch('mode', function(mode) {
@@ -95,9 +96,10 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         
         function modeSwitch(mode) {
             svgGraph.selectAll("path.graph-line").remove();
-
+            var callbacks;
             if (mode.dataSource == "countries") {
-                var callbacks = {
+                areas = scope.countries;
+                callbacks = {
                     classFunction: function(d) { 
                         return (d.regionCode + " graph-line country-" + d.code) 
                     },
@@ -106,7 +108,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                     mouseout: scope.deactivateCountry
                 }
             } else if (mode.dataSource == "regions") {
-                var callbacks = {
+                areas = scope.regions;
+                callbacks = {
                     classFunction: function(d) { 
                         return ("graph-line region-line region-" + d.code) 
                     },
@@ -117,13 +120,13 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             }
             switch (mode.graphType) {
                 case "percent":
-                    drawLines(scope.regions, percentLine, callbacks);
+                    drawLines(areas, percentLine, callbacks);
                 break;
                 case "growth":
-                    drawLines(scope.regions, growthLine, callbacks);
+                    drawLines(areas, growthLine, callbacks);
                 break;
                 case "absolute":
-                    drawLines(scope.regions, absoluteLine, callbacks);
+                    drawLines(areas, absoluteLine, callbacks);
                 break;
             }
         }
@@ -282,15 +285,6 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 });
             }
             svgGraph.selectAll("rect.selection").remove();
-        }
-        
-        function removeAxes() {
-            svgGraph.selectAll(".xLabel").remove();
-            svgGraph.selectAll(".yLabel").remove();
-            svgGraph.selectAll(".xTicks").remove();
-            svgGraph.selectAll(".yTicks").remove();
-            svgGraph.selectAll(".xAxis").remove();
-            svgGraph.selectAll(".yAxis").remove();
         }
     }
     return {

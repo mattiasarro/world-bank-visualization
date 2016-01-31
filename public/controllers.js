@@ -2,8 +2,8 @@ app = angular.module('app', []);
 
 app.controller('GraphController', ["$scope", "$http", "helpers", function($scope, $http, helpers) {
     $scope.mode = {
-        dataSource: 'regions', // | regions
-        graphType: 'absolute' // percent | growth | absolute | stack
+        dataSource: 'countries', // | regions
+        graphType: 'percent' // percent | growth | absolute | stack
     };
     $scope.growth  = {
         countries: { min: 0, max: 0 },

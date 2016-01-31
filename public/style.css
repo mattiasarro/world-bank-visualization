@@ -226,7 +226,7 @@ text {
   stroke-width: 1px; }
 #yearsSlider {
     width: 900px;
-    margin-left: 25px;
+    margin-left: 30px;
 }
 
 #wrapper {
@@ -234,8 +234,8 @@ text {
     margin: -30px auto 0;
 }
 #map {
-    width: 930px;
-    margin-left: 25px;
+    width: 915px;
+    margin-left: 33px;
     height: 580px;
     position: relative;
 }
@@ -337,4 +337,16 @@ text {
     background-image: none;
     border: 1px solid transparent;
     border-radius: 4px;
+}
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+}
+.xAxis, .yAxis {
+    display: none;
 }

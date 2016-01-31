@@ -19,6 +19,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 .on("mouseup", stopDragging);
         
         scope.$watch('limits', function(countries) {
+            removeAxes();
+            
             var startYear = scope.limits.startYear;
                 endYear = scope.limits.endYear;
             var min = scope.limits.min;
@@ -41,13 +43,6 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             var yPoints = [[{x: startYear, y: min}, {x: startYear, y: max }]];
             svgGraph.append("svg:path").data(xPoints).attr("d", line).attr("class", "axis xAxis"); // x-axis
             svgGraph.append("svg:path").data(yPoints).attr("d", line).attr("class", "axis yAxis"); // y-axis
-
-            svgGraph.selectAll(".xLabel").remove();
-            svgGraph.selectAll(".yLabel").remove();
-            svgGraph.selectAll(".xTicks").remove();
-            svgGraph.selectAll(".yTicks").remove();
-            svgGraph.selectAll(".xAxis").remove();
-            svgGraph.selectAll(".yAxis").remove();
             
             var xTicks = years.length >= 5 ? 5 : years.length - 1; // avoid the floating point years
             svgGraph.selectAll(".xLabel").data(x.ticks(xTicks))
@@ -75,6 +70,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                     .attr("y2", y)
                     .attr("x2", x(startYear));
         });
+        
+
 
         scope.$watch('mode', function(mode) {
             modeSwitch(mode);
@@ -291,6 +288,15 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 });
             }
             svgGraph.selectAll("rect.selection").remove();
+        }
+        
+        function removeAxes() {
+            svgGraph.selectAll(".xLabel").remove();
+            svgGraph.selectAll(".yLabel").remove();
+            svgGraph.selectAll(".xTicks").remove();
+            svgGraph.selectAll(".yTicks").remove();
+            svgGraph.selectAll(".xAxis").remove();
+            svgGraph.selectAll(".yAxis").remove();
         }
     }
     return {

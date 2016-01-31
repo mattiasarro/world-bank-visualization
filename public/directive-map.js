@@ -16,7 +16,7 @@ angular.module('app').directive("map", function() {
         });
         
         function setMap() {
-            width = 900, height = 580; // map width and height, matches 
+            width = 775, height = 580; // map width and height, matches 
             projection = d3.geo.mercator() // define our projection with parameters
                 .scale(170)
                 .translate([width / 2, height / 2])

@@ -27,7 +27,6 @@ a {
 }
 #filters {
   font-family: Arial, sans-serif;
-  margin-bottom: 20px;
 }
 #filters a {
   color: #000;
@@ -37,6 +36,7 @@ a {
   cursor: pointer;
   margin-right: 3px;
   border: 2px solid white;
+  display: block;
 }
 #filters a.active {
     border: 2px solid black;
@@ -103,7 +103,7 @@ a {
   color: #fff;
 }
 #vis {
-  min-height: 550px;
+  min-height: 430px;
 }
 
 path {
@@ -225,7 +225,7 @@ text {
   stroke: #333;
   stroke-width: 1px; }
 #yearsSlider {
-    width: 900px;
+    width: 775px;
     margin-left: 30px;
 }
 
@@ -349,4 +349,18 @@ text {
 }
 .xAxis, .yAxis {
     display: none;
+}
+#sidebar {
+    padding-right: 20px;
+    padding-top: 15px;
+}
+#filters a {
+    width: 145px;
+}
+#flags {
+    margin: 20px auto;
+    width: 140px;
+}
+td {
+    vertical-align: top;
 }

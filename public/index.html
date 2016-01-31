@@ -24,49 +24,61 @@
 <body>
 <div id="main-wrapper">
     <div id="content" ng-controller="GraphController">
-        <h1>
-            Internet Usage 
-            <span class="buttons">
-                <button type="button" class="btn {{btnActive('countries', mode.graphType)}}" ng-click="setMode('countries', mode.graphType)">C</button>
-                <button type="button" class="btn {{btnActive('regions', mode.graphType)}}" ng-click="setMode('regions', mode.graphType)">R</button>
-                <button type="button" class="btn {{btnActive(mode.dataSource, 'percent')}}" ng-click="setMode(mode.dataSource, 'percent')">%</button>
-                <button type="button" class="btn {{btnActive(mode.dataSource, 'growth')}}" ng-click="setMode(mode.dataSource, 'growth')">idx</button>
-                <button type="button" class="btn {{btnActive(mode.dataSource, 'absolute')}}" ng-click="setMode(mode.dataSource, 'absolute')">abs</button>
+        <table>
+            <tr>
+                <td></td>
+                <td>
+                    <h1>
+                        Internet Usage 
+                        <span class="buttons">
+                            <button type="button" class="btn {{btnActive('countries', mode.graphType)}}" ng-click="setMode('countries', mode.graphType)">C</button>
+                            <button type="button" class="btn {{btnActive('regions', mode.graphType)}}" ng-click="setMode('regions', mode.graphType)">R</button>
+                            <button type="button" class="btn {{btnActive(mode.dataSource, 'percent')}}" ng-click="setMode(mode.dataSource, 'percent')">%</button>
+                            <button type="button" class="btn {{btnActive(mode.dataSource, 'growth')}}" ng-click="setMode(mode.dataSource, 'growth')">idx</button>
+                            <button type="button" class="btn {{btnActive(mode.dataSource, 'absolute')}}" ng-click="setMode(mode.dataSource, 'absolute')">abs</button>
+                            
+                        </span>
+                    </h1>
+                </td>
+            </tr>
+            <tr>
+                <td id="sidebar">
+                    <div id="filters">
+                        <a ng-repeat="(id, region) in regions" 
+                        id="{{id}}" 
+                        class="{{id}}-{{region.state}} region-{{region.code}}"
+                        ng-click="toggleRegion(id)">{{region.name}}</a>
+                        
+                    </div>
+                    <div id="flags">
+                        <ul class="f16">
+                            <li ng-repeat="(countryCode, country) in countries" 
+                            class="flag {{country.codeAlpha2 | lowercase}} 
+                            country-{{country.code}}
+                            flag-{{country.state}}-{{country.regionCode}}
+                            flag-active-{{country.active}}"
+                            ng-click="togglePermaActive(country, true)"
+                            ng-mouseover="activateCountry(country)"
+                            ng-mouseout="deactivateCountry(country)"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>
+                        </ul>
+                    </div>
+                </td>
+                <td>
+                    
+                    
+                    <div graph id="vis"></div>
+                    <input id="yearsSlider" 
+                    type="range" 
+                    ng-model="year" 
+                    min="{{limits.startYear}}" 
+                    max="{{limits.endYear}}"
+                    step="1"
+                    />
+                    <div map id="map"></div>
                 
-            </span>
-        </h1>
-        <div class="row">
-            
-        </div>
-        <div id="filters">
-            <a ng-repeat="(id, region) in regions" 
-               id="{{id}}" 
-               class="{{id}}-{{region.state}} region-{{region.code}}"
-               ng-click="toggleRegion(id)">{{region.name}}</a>
-            
-        </div>
-        <div id="flags">
-            <ul class="f16">
-              <li ng-repeat="(countryCode, country) in countries" 
-                  class="flag {{country.codeAlpha2 | lowercase}} 
-                         country-{{country.code}}
-                         flag-{{country.state}}-{{country.regionCode}}
-                         flag-active-{{country.active}}"
-                  ng-click="togglePermaActive(country, true)"
-                  ng-mouseover="activateCountry(country)"
-                  ng-mouseout="deactivateCountry(country)"><img ng-if="country.state == 'hidden'" src="transparent.png" /></li>
-            </ul>
-        </div>
-        
-        <div graph id="vis"></div>
-         <input id="yearsSlider" 
-             type="range" 
-             ng-model="year" 
-             min="{{limits.startYear}}" 
-             max="{{limits.endYear}}"
-             step="1"
-         />
-        <div map id="map"></div>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
 <!-- <script type="text/javascript" src="./life.js"></script> -->

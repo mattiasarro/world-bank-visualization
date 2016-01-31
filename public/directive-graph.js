@@ -6,8 +6,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         var marginTop = 20;
         var marginBottom = 20;
         var marginRight = 150; // area for names
-        var width = 925 + marginRight;
-        var height = 550;
+        var width = 800 + marginRight;
+        var height = 450;
         
         var y, x, years, endYear, svgGraph, currentYearLine, percentLine, growthLine, absoluteLine, xReversed, yReversed;
         var dragging = false; // disable the frame after mouse up

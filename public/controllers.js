@@ -172,14 +172,19 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     }    
     
     $scope.activateRegion = function(region, fromView) {
-        d3.selectAll("a.region-" + region.code).classed("active", true);
-        $scope.$broadcast('activate', region);
+        console.log("activate");
+        if ($scope.mode.dataSource == "regions") {
+            d3.selectAll("a.region-" + region.code).classed("active", true);
+            $scope.$broadcast('activate', region);
+        }
     }
     
     $scope.deactivateRegion = function(region, fromView) {
-        d3.selectAll("a.region-" + region.code).classed("active", false);
-        $scope.$broadcast('deactivate', region);
-
+        console.log("deact");
+        if ($scope.mode.dataSource == "regions") {
+            d3.selectAll("a.region-" + region.code).classed("active", false);
+            $scope.$broadcast('deactivate', region);
+        }
     }
     
     $scope.toggleRegion = function(regionCode) {

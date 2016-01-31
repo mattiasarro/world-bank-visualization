@@ -49,7 +49,10 @@
                         <a ng-repeat="(id, region) in regions" 
                         id="{{id}}" 
                         class="{{id}}-{{region.state}} region-{{region.code}}"
-                        ng-click="toggleRegion(id)">{{region.name}}</a>
+                        ng-click="toggleRegion(id)"
+                        ng-mouseover="activateRegion(region, true)"
+                        ng-mouseout="deactivateRegion(region, true)"
+                        >{{region.name}}</a>
                     </div>
                     <div id="flags">
                         <ul class="f16">

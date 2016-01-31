@@ -9,7 +9,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         var width = 925 + marginRight;
         var height = 550;
         
-        var y, x, years, endYear, svgGraph, line, percentLine, growthLine, absoluteLine, xReversed, yReversed;
+        var y, x, years, endYear, svgGraph, currentYearLine, percentLine, growthLine, absoluteLine, xReversed, yReversed;
         var dragging = false; // disable the frame after mouse up
         
         svgGraph = d3.select(element[0]).append("svg")
@@ -35,8 +35,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             x = d3.scale.linear().domain([startYear, endYear]).range([marginLeft, width - marginRight]);
             years = d3.range(startYear, endYear + 1);
 
-            line = d3.svg.line().x(function(d) { return x(d.x) })
-                                .y(function(d) { return y(d.y) });
+            currentYearLine = d3.svg.line().x(function(d) { return( x(d.x) - 1) })
+                                           .y(function(d) { return y(d.y) });
             percentLine = d3.svg.line().x(function(d) { return x(d.year) })
                                        .y(function(d) { return y(d.percent) });
             growthLine = d3.svg.line().x(function(d) { return x(d.year) })
@@ -51,7 +51,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 .tickFormat(Number)
                 .tickSize(5, 0);
             svgGraph.append("g")
-                .attr("transform", "translate(" + 0 + "," + (height-marginBottom) + ")")
+                .attr("transform", "translate(" + -1 + "," + (height-marginBottom+1) + ")")
                 .attr("class", "x axis")
                 .call(xAxis);
             
@@ -69,7 +69,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 .tickFormat(tickFormat) // replace Giga with Billion
                 .tickSize(5, 0);
             svgGraph.append("g")
-                .attr("transform", "translate(" + (marginLeft) + "," + 0 + ")")
+                .attr("transform", "translate(" + (marginLeft - 1) + "," + 0 + ")")
                 .attr("class", "y axis")
                 .call(yAxis);
         });
@@ -87,10 +87,10 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                                     {x: scope.$parent.year, y: scope.limits.max} ]];
             var sel = svgGraph.selectAll("path.year")
                               .data(selectedPoints, function(d){ return 1 })
-                              .attr("d", line);
+                              .attr("d", currentYearLine);
             
             sel.enter().append("svg:path")
-               .attr("d", line)
+               .attr("d", currentYearLine)
                .attr("class", "axis year");
         });
         

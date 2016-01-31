@@ -50,13 +50,13 @@
                         id="{{id}}" 
                         class="{{id}}-{{region.state}} region-{{region.code}}"
                         ng-click="toggleRegion(id)"
-                        ng-mouseover="activateRegion(region, true)"
-                        ng-mouseout="deactivateRegion(region, true)"
+                        ng-mouseover="activateRegion(region)"
+                        ng-mouseout="deactivateRegion(region)"
                         >{{region.name}}</a>
                     </div>
                     <div id="flags">
                         <ul class="f16">
-                            <li ng-repeat="(countryCode, country) in countries" 
+                            <li ng-repeat="country in countries | orderObjectBy:'sortCode'" 
                             class="flag {{country.codeAlpha2 | lowercase}} 
                             country-{{country.code}}
                             flag-{{country.state}}-{{country.regionCode}}

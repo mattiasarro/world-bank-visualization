@@ -23,13 +23,13 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     $scope.year = $scope.limits.startYear;
     
     $scope.regions = {
-        "ECS": {code: "ECS", name: "Europe and Central Asia", state: "visible"},
-        "NAC": {code: "NAC", name: "North America", state: "visible"},
-        "LCN": {code: "LCN", name: "Latin America & Caribbean", state: "visible"},
-        "EAS": {code: "EAS", name: "East Asia & Pacific", state: "visible"},
-        "SAS": {code: "SAS", name: "South Asia", state: "visible"},
-        "MEA": {code: "MEA", name: "Middle East & North Africa", state: "visible"},
-        "SSF": {code: "SSF", name: "Sub-Saharan Africa", state: "visible"},
+        "ECS": {code: "ECS", name: "Europe and Central Asia", state: "visible", sortCode: 0},
+        "NAC": {code: "NAC", name: "North America", state: "visible", sortCode: 1},
+        "LCN": {code: "LCN", name: "Latin America & Caribbean", state: "visible", sortCode: 2},
+        "EAS": {code: "EAS", name: "East Asia & Pacific", state: "visible", sortCode: 3},
+        "SAS": {code: "SAS", name: "South Asia", state: "visible", sortCode: 4},
+        "MEA": {code: "MEA", name: "Middle East & North Africa", state: "visible", sortCode: 5},
+        "SSF": {code: "SSF", name: "Sub-Saharan Africa", state: "visible", sortCode: 6}
     };
 
     $scope.countries = {};
@@ -46,6 +46,9 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
             var rows = d3.csv.parseRows(text);
             for (i = 1; i < rows.length; i++) {
                 var countryCode = rows[i][3];
+                var regionCode = countriesRegions[countryCode];
+                var sortCode = $scope.regions[regionCode] == undefined ? 1000 : $scope.regions[regionCode]['sortCode'];
+                console.log(sortCode);
                 var country = $scope.countries[countryCode];
                 var dataPoints = country == undefined || country.dataPoints == undefined ? {} : country.dataPoints;
                 var dataPoints = extractData(dataPoints, rows[i], "countries");
@@ -55,13 +58,15 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
                     $scope.countries[countryCode] = {
                         code: countryCode,
                         codeAlpha2: alpha2,
+                        sortCode: sortCode,
                         name: rows[i][2],
-                        regionCode: countriesRegions[countryCode],
+                        regionCode: regionCode,
                         state: "visible", // highlighted | hidden
                         dataPoints: dataPoints
                     };
                 }
             }
+            // $scope.countries
             calculateAbsolute($scope.countries, "countries");
         });
         
@@ -171,7 +176,7 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
         $scope.$broadcast('deactivate', country);
     }    
     
-    $scope.activateRegion = function(region, fromView) {
+    $scope.activateRegion = function(region) {
         console.log("activate");
         if ($scope.mode.dataSource == "regions") {
             d3.selectAll("a.region-" + region.code).classed("active", true);
@@ -179,7 +184,7 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
         }
     }
     
-    $scope.deactivateRegion = function(region, fromView) {
+    $scope.deactivateRegion = function(region) {
         console.log("deact");
         if ($scope.mode.dataSource == "regions") {
             d3.selectAll("a.region-" + region.code).classed("active", false);

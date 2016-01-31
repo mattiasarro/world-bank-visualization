@@ -41,6 +41,27 @@ a {
 #filters a.active {
     border: 2px solid black;
 }
+#filters a.active.region-SAS {
+    border: 2px solid #895881;
+}
+#filters a.active.region-ECS {
+    border: 2px solid #ED7C31;
+}
+#filters a.active.region-MEA {
+    border: 2px solid #c9da3b;
+}
+#filters a.active.region-SSF {
+    border: 2px solid #6E9E75;
+}
+#filters a.active.region-LCN {
+    border: 2px solid #00BBD6;
+}
+#filters a.active.region-EAS {
+    border: 2px solid #e25f82;
+}
+#filters a.active.region-NAC {
+    border: 2px solid #be1932;
+}
 #filters a.SAS-hidden, 
 #filters a.ECS-hidden, 
 #filters a.MEA-hidden, 
@@ -95,7 +116,7 @@ path.active, path.highlighted.active {
   stroke-width: 1.7;
 }
 .region-line {
-    stroke-width: 2px;
+    stroke-width: 3px;
 }
 .flag {
     border: 2px solid white;

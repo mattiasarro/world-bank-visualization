@@ -27,10 +27,12 @@
         <h1>
             Internet Usage 
             <span class="buttons">
-                <button type="button" class="btn {{btnActive('countries', 'percent')}}" ng-click="setMode('countries', 'percent')">Countries (%)</button>
-                <button type="button" class="btn {{btnActive('countries', 'index')}}" ng-click="setMode('countries', 'index')">Countries (idx)</button>
-                <button type="button" class="btn {{btnActive('regions', 'percent')}}" ng-click="setMode('regions', 'percent')">Regions (%)</button>
-                <button type="button" class="btn {{btnActive('regions', 'index')}}" ng-click="setMode('regions', 'index')">Regions (idx)</button>
+                <button type="button" class="btn {{btnActive('countries', mode.graphType)}}" ng-click="setMode('countries', mode.graphType)">C</button>
+                <button type="button" class="btn {{btnActive('regions', mode.graphType)}}" ng-click="setMode('regions', mode.graphType)">R</button>
+                <button type="button" class="btn {{btnActive(mode.dataSource, 'percent')}}" ng-click="setMode(mode.dataSource, 'percent')">%</button>
+                <button type="button" class="btn {{btnActive(mode.dataSource, 'index')}}" ng-click="setMode(mode.dataSource, 'index')">idx</button>
+                <button type="button" class="btn {{btnActive(mode.dataSource, 'absolute')}}" ng-click="setMode(mode.dataSource, 'absolute')">abs</button>
+                
             </span>
         </h1>
         <div class="row">
@@ -39,7 +41,7 @@
         <div id="filters">
             <a ng-repeat="(id, region) in regions" 
                id="{{id}}" 
-               class="{{id}}-{{region.state}} {{region.active ? 'active' : ''}}"
+               class="{{id}}-{{region.state}} region-{{region.code}}"
                ng-click="toggleRegion(id)">{{region.name}}</a>
             
         </div>

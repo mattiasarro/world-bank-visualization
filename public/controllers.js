@@ -19,13 +19,13 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     $scope.year = $scope.limits.startYear;
     
     $scope.regions = {
-        "ECS": {code: "ECS", name: "Europe and Central Asia", state: "visible", active: false},
-        "NAC": {code: "NAC", name: "North America", state: "visible", active: false},
-        "LCN": {code: "LCN", name: "Latin America & Caribbean", state: "visible", active: false},
-        "EAS": {code: "EAS", name: "East Asia & Pacific", state: "visible", active: false},
-        "SAS": {code: "SAS", name: "South Asia", state: "visible", active: false},
-        "MEA": {code: "MEA", name: "Middle East & North Africa", state: "visible", active: false},
-        "SSF": {code: "SSF", name: "Sub-Saharan Africa", state: "visible", active: false},
+        "ECS": {code: "ECS", name: "Europe and Central Asia", state: "visible"},
+        "NAC": {code: "NAC", name: "North America", state: "visible"},
+        "LCN": {code: "LCN", name: "Latin America & Caribbean", state: "visible"},
+        "EAS": {code: "EAS", name: "East Asia & Pacific", state: "visible"},
+        "SAS": {code: "SAS", name: "South Asia", state: "visible"},
+        "MEA": {code: "MEA", name: "Middle East & North Africa", state: "visible"},
+        "SSF": {code: "SSF", name: "Sub-Saharan Africa", state: "visible"},
     };
 
     $scope.countries = {};
@@ -50,8 +50,7 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
                         code: countryCode,
                         codeAlpha2: alpha2,
                         name: rows[i][2],
-                        regionCode: countriesRegions[countryCode], // ECS | NAN, etc
-                        active: false,
+                        regionCode: countriesRegions[countryCode],
                         state: "visible", // highlighted | hidden
                         dataPoints: dataPoints
                     };
@@ -149,22 +148,23 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     
     $scope.activateCountry = function(country) {
         $scope.$broadcast('activate', country);
+        d3.selectAll("li.country-" + country.code).classed("active", true);
     }
     
     $scope.deactivateCountry = function(country) {
+        d3.selectAll("li.country-" + country.code).classed("active", false);
         $scope.$broadcast('deactivate', country);
     }    
     
     $scope.activateRegion = function(region, fromView) {
-        $scope.$apply(function() {
-            $scope.regions[region.code].active = true;
-        });
+        d3.selectAll("a.region-" + region.code).classed("active", true);
+        $scope.$broadcast('activate', region);
     }
     
     $scope.deactivateRegion = function(region, fromView) {
-        $scope.$apply(function() {
-            $scope.regions[region.code].active = false;
-        });
+        d3.selectAll("a.region-" + region.code).classed("active", false);
+        $scope.$broadcast('deactivate', region);
+
     }
     
     $scope.toggleRegion = function(regionCode) {

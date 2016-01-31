@@ -108,16 +108,6 @@ angular.module('app').directive("map", function() {
                 return(0);
             }
         }
-
-        function getBorderColor(d) {
-            if (d.properties.active) {
-                return "#000000";
-            } else if (d.properties.state == "highlighted") {
-                return highlights[d.properties.regionCode];
-            } else {
-                return "#FFFFFF";
-            }
-        }
         
         function getColor(d) {
             if (d.properties.state == "hidden") {

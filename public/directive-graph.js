@@ -70,8 +70,6 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                     .attr("y2", y)
                     .attr("x2", x(startYear));
         });
-        
-
 
         scope.$watch('mode', function(mode) {
             modeSwitch(mode);
@@ -141,9 +139,9 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             countryLines.exit().remove(); // exit
         }
         
-        function defineCountryNameBehavior(selection) {
+        function defineLineNameBehavior(selection) {
             selection
-            .attr("class", function(d){ return("countryName countryName-" + d.code) })
+            .attr("class", function(d){ return("lineName lineName-" + d.code) })
             .text(function(d) { return( d.name); })
             .attr("x", function(d) { return x(endYear + 0.2) })
             .attr("y", function(d) { 
@@ -174,16 +172,15 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         }
         
         scope.$on('activate', function(event, country) {
-            var countryNames = svgGraph.selectAll("text.countryName-" + country.code).data([country]);            
-            defineCountryNameBehavior(countryNames.enter().append("svg:text"));
-            d3.selectAll("li.country-" + country.code).classed("active", true);
+            var lineNames = svgGraph.selectAll("text.lineName-" + country.code).data([country]);            
+            defineLineNameBehavior(lineNames.enter().append("svg:text"));
             d3.selectAll("path.country-" + country.code).classed("active", true);
         })
         
         scope.$on('deactivate', function(event, country) {
             if (country.permaActive) { return; }
-            d3.selectAll(".country-" + country.code).classed("active", false);
-            d3.selectAll(".countryName-" + country.code).remove();
+            d3.selectAll("path.country-" + country.code).classed("active", false);
+            d3.selectAll("text.lineName-" + country.code).remove();
 
         })
 

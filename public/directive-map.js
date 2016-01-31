@@ -95,7 +95,7 @@ angular.module('app').directive("map", function() {
                 var dataPoint = dataPoints["year" + scope.year];
                 if (dataPoint != null) {
                     var key;
-                    if (scope.mode.graphType == "index") {
+                    if (scope.mode.graphType == "growth") {
                         key = "percentGrowth"
                     } else {
                         key = "percent"

@@ -7,7 +7,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         var margin = 30;
         var rightMargin = 150;
         
-        var y, x, years, endYear, svgGraph, line, percentLine, indexLine, xReversed, yReversed;
+        var y, x, years, endYear, svgGraph, line, percentLine, growthLine, xReversed, yReversed;
         var dragging = false; // disable the frame after mouse up
         
         svgGraph = d3.select(element[0]).append("svg")
@@ -36,8 +36,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                                 .y(function(d) { return y(d.y) });
             percentLine = d3.svg.line().x(function(d) { return x(d.year) })
                                        .y(function(d) { return y(d.percent) });
-            indexLine = d3.svg.line().x(function(d) { return x(d.year) })
-                                     .y(function(d) { return y(d.percentGrowth) });
+            growthLine = d3.svg.line().x(function(d) { return x(d.year) })
+                                      .y(function(d) { return y(d.percentGrowth) });
 
             var xPoints = [[{x: startYear, y: min}, {x: endYear, y: min }]]; // not sure why array inside array necessary
             var yPoints = [[{x: startYear, y: min}, {x: startYear, y: max }]];
@@ -107,8 +107,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                     case "percent":
                         drawLines(scope.countries, percentLine, callbacks);
                         break;
-                    case "index":
-                        drawLines(scope.countries, indexLine, callbacks);
+                    case "growth":
+                        drawLines(scope.countries, growthLine, callbacks);
                         break;
                 }
             } else if (mode.dataSource == "regions") {
@@ -124,8 +124,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                     case "percent":
                         drawLines(scope.regions, percentLine, callbacks);
                         break;
-                    case "index":
-                        drawLines(scope.regions, indexLine, callbacks);
+                    case "growth":
+                        drawLines(scope.regions, growthLine, callbacks);
                         break;
                 }
             }

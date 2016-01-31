@@ -3,9 +3,13 @@ app = angular.module('app', []);
 app.controller('GraphController', ["$scope", "$http", "helpers", function($scope, $http, helpers) {
     $scope.mode = {
         dataSource: 'regions', // | regions
-        graphType: 'percent' // | index | absolute | stack
+        graphType: 'percent' // | growth | absolute | stack
     };
     $scope.growth  = {
+        countries: { min: 0, max: 0 },
+        regions: { min: 0, max: 0 }
+    }
+    $scope.absolute  = {
         countries: { min: 0, max: 0 },
         regions: { min: 0, max: 0 }
     }
@@ -41,8 +45,10 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
         $http.get('internet-usage-countries.csv').success(function(text) {
             var rows = d3.csv.parseRows(text);
             for (i = 1; i < rows.length; i++) {
-                var countryCode = rows[i][3];                
-                var dataPoints = extractData({}, rows[i], "countries");
+                var countryCode = rows[i][3];
+                var country = $scope.countries[countryCode];
+                var dataPoints = country == undefined || country.dataPoints == undefined ? {} : country.dataPoints;
+                var dataPoints = extractData(dataPoints, rows[i], "countries");
                 var alpha2 = iso_3366_1_Alpha3_to_Alpha2[countryCode];
                 
                 if (alpha2 != undefined && Object.keys(dataPoints).length > 0) {
@@ -56,6 +62,7 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
                     };
                 }
             }
+            calculateAbsolute($scope.countries, "countries");
         });
         
         $http.get('internet-usage-regions.csv').success(function(text) {
@@ -64,8 +71,9 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
                 var regionCode = rows[i][3];
                 var region = $scope.regions[regionCode];
                 var dataPoints = region.dataPoints == undefined ? {} : region.dataPoints;
-                $scope.regions[regionCode].dataPoints = extractData(dataPoints, rows[i], "regions");
+                region.dataPoints = extractData(dataPoints, rows[i], "regions");
             };
+            calculateAbsolute($scope.regions, "regions");
         });
         
         function extractData(dataPoints, row, dataSource) {
@@ -106,6 +114,17 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
             return dataPoints;
         }
 
+        function calculateAbsolute(areas, dataSource) {
+            _.forEach(areas, function(area, key) {
+                _.forEach(area.dataPoints, function(dataPoint, i) {
+                    var absolute = parseInt(dataPoint.percent / 100) * dataPoint.population;
+                    if (absolute < $scope.absolute[dataSource].min) { $scope.absolute[dataSource].min = absolute }
+                    if (absolute > $scope.absolute[dataSource].max) { $scope.absolute[dataSource].max = absolute }
+                    areas[key]['dataPoints']['absolute'] = absolute;
+                    return(dataPoint);
+                });
+            })
+        }
     });
 
     
@@ -118,17 +137,13 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
         $scope.mode.dataSource = dataSource;
         $scope.mode.graphType = graphType;
         var limits = angular.copy($scope.limits); // hack, otherwise doesn't trigger changed event
-        if (graphType == "index") {
-            if (dataSource == "countries") {
-                limits.min = $scope.growth.countries.min;
-                limits.max = $scope.growth.countries.max;
-            } else if (dataSource == "regions") {
-                limits.min = $scope.growth.regions.min;
-                limits.max = $scope.growth.regions.max;
-            }
-        } else if (graphType == "percent") {
+        if (graphType == "percent") {
             limits.min = $scope.percent.min;
             limits.max = $scope.percent.max;
+        } else {
+            console.log(graphType, dataSource);
+            limits.min = $scope[graphType][dataSource].min;
+            limits.max = $scope[graphType][dataSource].max;
         }
         $scope.limits = limits;
     }

@@ -7,7 +7,7 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
         var margin = 30;
         var rightMargin = 150;
         
-        var y, x, years, endYear, svgGraph, line, percentLine, growthLine, xReversed, yReversed;
+        var y, x, years, endYear, svgGraph, line, percentLine, growthLine, absoluteLine, xReversed, yReversed;
         var dragging = false; // disable the frame after mouse up
         
         svgGraph = d3.select(element[0]).append("svg")
@@ -38,6 +38,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                                        .y(function(d) { return y(d.percent) });
             growthLine = d3.svg.line().x(function(d) { return x(d.year) })
                                       .y(function(d) { return y(d.percentGrowth) });
+            absoluteLine = d3.svg.line().x(function(d) { return x(d.year) })
+                                        .y(function(d) { return y(d.absolute) });
 
             var xPoints = [[{x: startYear, y: min}, {x: endYear, y: min }]]; // not sure why array inside array necessary
             var yPoints = [[{x: startYear, y: min}, {x: startYear, y: max }]];
@@ -103,14 +105,6 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                     mouseover: scope.activateCountry,
                     mouseout: scope.deactivateCountry
                 }
-                switch (mode.graphType) {
-                    case "percent":
-                        drawLines(scope.countries, percentLine, callbacks);
-                        break;
-                    case "growth":
-                        drawLines(scope.countries, growthLine, callbacks);
-                        break;
-                }
             } else if (mode.dataSource == "regions") {
                 var callbacks = {
                     classFunction: function(d) { 
@@ -120,14 +114,17 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                     mouseover: scope.activateRegion,
                     mouseout: scope.deactivateRegion
                 }
-                switch (mode.graphType) {
-                    case "percent":
-                        drawLines(scope.regions, percentLine, callbacks);
-                        break;
-                    case "growth":
-                        drawLines(scope.regions, growthLine, callbacks);
-                        break;
-                }
+            }
+            switch (mode.graphType) {
+                case "percent":
+                    drawLines(scope.regions, percentLine, callbacks);
+                break;
+                case "growth":
+                    drawLines(scope.regions, growthLine, callbacks);
+                break;
+                case "absolute":
+                    drawLines(scope.regions, absoluteLine, callbacks);
+                break;
             }
         }
         

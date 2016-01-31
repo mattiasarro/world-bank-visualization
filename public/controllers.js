@@ -3,7 +3,7 @@ app = angular.module('app', []);
 app.controller('GraphController', ["$scope", "$http", "helpers", function($scope, $http, helpers) {
     $scope.mode = {
         dataSource: 'regions', // | regions
-        graphType: 'percent' // | growth | absolute | stack
+        graphType: 'absolute' // percent | growth | absolute | stack
     };
     $scope.growth  = {
         countries: { min: 0, max: 0 },
@@ -116,11 +116,11 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
 
         function calculateAbsolute(areas, dataSource) {
             _.forEach(areas, function(area, key) {
-                _.forEach(area.dataPoints, function(dataPoint, i) {
-                    var absolute = parseInt(dataPoint.percent / 100) * dataPoint.population;
+                _.forEach(area.dataPoints, function(dataPoint, year) {
+                    var absolute = parseInt(dataPoint.percent / 100 * dataPoint.population);
                     if (absolute < $scope.absolute[dataSource].min) { $scope.absolute[dataSource].min = absolute }
                     if (absolute > $scope.absolute[dataSource].max) { $scope.absolute[dataSource].max = absolute }
-                    areas[key]['dataPoints']['absolute'] = absolute;
+                    areas[key]['dataPoints'][year]['absolute'] = absolute;
                     return(dataPoint);
                 });
             })

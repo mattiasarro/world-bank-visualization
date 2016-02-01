@@ -2,8 +2,8 @@ app = angular.module('app', []);
 
 app.controller('GraphController', ["$scope", "$http", "helpers", function($scope, $http, helpers) {
     $scope.mode = {
-        dataSource: 'countries', // | regions
-        graphType: 'percent' // percent | growth | absolute | stack
+        dataSource: 'regions', // countries | regions
+        graphType: 'stack' // percent | growth | absolute | stack
     };
     $scope.growth  = {
         countries: { min: 0, max: 0 },
@@ -48,7 +48,6 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
                 var countryCode = rows[i][3];
                 var regionCode = countriesRegions[countryCode];
                 var sortCode = $scope.regions[regionCode] == undefined ? 1000 : $scope.regions[regionCode]['sortCode'];
-                console.log(sortCode);
                 var country = $scope.countries[countryCode];
                 var dataPoints = country == undefined || country.dataPoints == undefined ? {} : country.dataPoints;
                 var dataPoints = extractData(dataPoints, rows[i], "countries");
@@ -142,7 +141,7 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
         var dataSource = $scope.mode.dataSource;
         var graphType = $scope.mode.graphType;
         var limits = angular.copy($scope.limits); // hack, otherwise doesn't trigger changed event
-        if (graphType == "percent") {
+        if (graphType == "percent" || graphType == "stack") {
             limits.min = $scope.percent.min;
             limits.max = $scope.percent.max;
         } else {

@@ -23,13 +23,13 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     $scope.year = $scope.limits.startYear;
     
     $scope.regions = {
-        "ECS": {code: "ECS", name: "Europe and Central Asia", state: "visible", sortCode: 0},
-        "NAC": {code: "NAC", name: "North America", state: "visible", sortCode: 1},
-        "LCN": {code: "LCN", name: "Latin America & Caribbean", state: "visible", sortCode: 2},
-        "EAS": {code: "EAS", name: "East Asia & Pacific", state: "visible", sortCode: 3},
-        "SAS": {code: "SAS", name: "South Asia", state: "visible", sortCode: 4},
-        "MEA": {code: "MEA", name: "Middle East & North Africa", state: "visible", sortCode: 5},
-        "SSF": {code: "SSF", name: "Sub-Saharan Africa", state: "visible", sortCode: 6}
+        "ECS": {code: "ECS", name: "Europe and Central Asia", state: "visible", sortCode: 0, color: "#ED7C31"},
+        "NAC": {code: "NAC", name: "North America", state: "visible", sortCode: 1, color: "#be1932"},
+        "LCN": {code: "LCN", name: "Latin America & Caribbean", state: "visible", sortCode: 2, color: "#00BBD6"},
+        "EAS": {code: "EAS", name: "East Asia & Pacific", state: "visible", sortCode: 3, color: "#e25f82"},
+        "SAS": {code: "SAS", name: "South Asia", state: "visible", sortCode: 4, color: "#895881"},
+        "MEA": {code: "MEA", name: "Middle East & North Africa", state: "visible", sortCode: 5, color: "#c9da3b"},
+        "SSF": {code: "SSF", name: "Sub-Saharan Africa", state: "visible", sortCode: 6, color: "#6E9E75"}
     };
 
     $scope.countries = {};
@@ -177,6 +177,7 @@ app.controller('GraphController', ["$scope", "$http", "helpers", function($scope
     
     $scope.activateRegion = function(region) {
         console.log("activate");
+        console.log(region);
         if ($scope.mode.dataSource == "regions") {
             d3.selectAll("a.region-" + region.code).classed("active", true);
             $scope.$broadcast('activate', region);

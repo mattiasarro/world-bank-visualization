@@ -131,19 +131,26 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                     drawLines(areas, absoluteLine, callbacks);
                 break;
                 case "stack":
-                    drawStack(areas);
+                    drawStack(areas, callbacks);
                 break;
             }
         }
         
-        function drawStack(data) {
+        function drawStack(data, callbacks) {
             var data = _.reject(data, {state: "hidden"});
             console.log("drawStack");
             console.log(data);
             
             var y = d3.scale.linear()
                 .range([height-marginBottom, 0]);
-            var color = d3.scale.category20();
+            var color;
+            if (scope.mode.dataSource == "countries") {
+                color = d3.scale.category20();
+            } else {
+                color = function(code) {
+                    return scope.regions[code].color;
+                }
+            }
             var areaFunction = d3.svg.area()
                 .x(function(d) { return x(d.year) })
                 .y0(function(d) { return y(d.y0); })
@@ -152,15 +159,17 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
                 .values(function(d) { return d.values; });
             
             var codes = d3.keys(data);
-            var computedLayers = stack(codes.map(function(code) { // Computes the y-coordinate baseline for each layer
-                var values = _.map(data[code].dataPoints, function(dataPoint, yearStr) {
+            var codes = _.map(data, function(d) { return d.code});
+            console.log(codes);
+            var computedLayers = stack(_.map(data, function(d) { // Computes the y-coordinate baseline for each layer
+                var values = _.map(d.dataPoints, function(dataPoint, yearStr) {
                     return {
                         year: dataPoint.year,
                         y: dataPoint['absolute']
                     }
                 })
                 return {
-                    code: code,
+                    code: d.code,
                     values: values // {year: 2014, y: }, {year: 2013, }
                 };
             }));
@@ -179,8 +188,8 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             
             var areas = svgGraph.selectAll(".area").data(computedLayers);
             areas.exit().remove();
-            defineAreaBehavior(areas, areaFunction, color); // update
-            defineAreaBehavior(areas.enter().append("svg:path"), areaFunction, color); // enter
+            defineAreaBehavior(areas, areaFunction, color, callbacks); // update
+            defineAreaBehavior(areas.enter().append("svg:path"), areaFunction, color, callbacks); // enter
         }
         
         function drawLines(elements, lineFunction, callbacks) {
@@ -223,24 +232,30 @@ angular.module('app').directive("graph", ['helpers', function(helpers) {
             .on("mouseout", callbacks.mouseout);
         }
         
-        function defineAreaBehavior(selection, areaFunction, color) {
+        function defineAreaBehavior(selection, areaFunction, color, callbacks) {
             selection
             .attr("class", "area")
             .attr("d", function(d) { 
                 return areaFunction(d.values); })
             .style("fill", function(d) { return color(d.code); })
+            .on("mouseover", callbacks.mouseover)
+            .on("mouseout", callbacks.mouseout);
         }
         
         scope.$on('activate', function(event, country) {
-            var lineNames = svgGraph.selectAll("text.lineName-" + country.code).data([country]);
-            defineLineNameBehavior(lineNames.enter().append("svg:text"));
-            d3.selectAll("path.country-" + country.code).classed("active", true);
+            if (scope.mode.graphType != "stack") {                
+                var lineNames = svgGraph.selectAll("text.lineName-" + country.code).data([country]);
+                defineLineNameBehavior(lineNames.enter().append("svg:text"));
+                d3.selectAll("path.country-" + country.code).classed("active", true);
+            }
         })
         
         scope.$on('deactivate', function(event, country) {
             if (country.permaActive) { return; }
-            d3.selectAll("path.country-" + country.code).classed("active", false);
-            d3.selectAll("text.lineName-" + country.code).remove();
+            if (scope.mode.graphType != "stack") {                
+                d3.selectAll("path.country-" + country.code).classed("active", false);
+                d3.selectAll("text.lineName-" + country.code).remove();
+            }
 
         })
 
